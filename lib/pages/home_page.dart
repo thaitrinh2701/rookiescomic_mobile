@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart';
-import 'package:rookiescomic_mobile/pages/setting_screen.dart';
+import 'package:rookiescomic_mobile/screens/comic_screen.dart';
+import 'package:rookiescomic_mobile/screens/setting_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.index});
@@ -32,20 +33,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-    const NavigationDestination(
-      icon: Icon(Icons.category),
-      label: 'Categories',
-    ),
+    const NavigationDestination(icon: Icon(Icons.home), label: 'Comic'),
+    const NavigationDestination(icon: Icon(Icons.category), label: 'Danh mục'),
     const NavigationDestination(
       icon: Icon(Icons.library_books),
-      label: 'Library',
+      label: 'Thư viện',
     ),
-    const NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+    const NavigationDestination(icon: Icon(Icons.settings), label: 'Cài đặt'),
   ];
 
   final List<Widget> _screens = [
-    const Center(child: Text('Trang chủ')),
+    // const Center(child: Text('Comic')),
+    const ComicScreen(),
     const Center(child: Text('Danh mục')),
     const Center(child: Text('Thư viện')),
     const SettingScreen(),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rookiescomic_mobile/apis/google_signout.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart';
-import 'package:rookiescomic_mobile/pages/subscription_screen.dart';
+import 'package:rookiescomic_mobile/pages/subscription_page.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -37,6 +37,7 @@ class _SettingScreenState extends State<SettingScreen> {
       appBar: AppBar(
         title: Text("Cài đặt"),
         automaticallyImplyLeading: false, // Ẩn nút back
+        toolbarHeight: 60,
       ),
       extendBodyBehindAppBar: true,
       body: ListView(
@@ -167,11 +168,11 @@ class _SettingScreenState extends State<SettingScreen> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: Text("Đồng ý"),
+                    child: Text("Từ chối"),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: Text("Từ chối", style: TextStyle(color: Colors.red)),
+                    child: Text("Đồng ý", style: TextStyle(color: Colors.red)),
                   ),
                 ],
               ),
