@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rookiescomic_mobile/models/comics.dart';
+import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
+import 'package:rookiescomic_mobile/widgets/below_comics.dart';
 import 'package:rookiescomic_mobile/widgets/top_comics.dart';
 
 class ComicScreen extends StatefulWidget {
@@ -12,22 +15,22 @@ class _ComicsScreenState extends State<ComicScreen> {
   void _navigateToDetail(Map<String, String> comics) {
     if (!mounted) return;
     if (comics.isEmpty) {
-      print("Error: Manga data is empty!");
+      print("Error: Comic data is empty!");
       return;
     }
 
-    // Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => MangaDetailPage(manga: manga),
-    //       ),
-    //     )
-    //     .then((_) {
-    //       print("Returned from detail page");
-    //     })
-    //     .catchError((e) {
-    //       print("Navigation error: $e");
-    //     });
+    Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ComicDetailPage(comic: comics),
+          ),
+        )
+        .then((_) {
+          print("Returned from detail page");
+        })
+        .catchError((e) {
+          print("Navigation error: $e");
+        });
   }
 
   @override
@@ -37,15 +40,15 @@ class _ComicsScreenState extends State<ComicScreen> {
         title: const Text('Rookies Comic'),
         toolbarHeight: 60,
         actions: [
-          IconButton(
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const SearchPage()),
-              // );
-            },
-            icon: const Icon(Icons.search),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const SearchScreen()),
+          //     );
+          //   },
+          //   icon: const Icon(Icons.search),
+          // ),
         ],
       ),
       extendBodyBehindAppBar: true,
@@ -58,25 +61,25 @@ class _ComicsScreenState extends State<ComicScreen> {
 
             const SizedBox(height: 30),
 
-            // SizedBox(
-            //   height: 240,
-            //   child: MangaList(
-            //     fetchManga: () => getTopMangaOfWeek(limit: 4),
-            //     title: "Comics of the Week",
-            //     onTapManga: _navigateToDetail,
-            //   ),
-            // ),
+            SizedBox(
+              height: 275,
+              child: ComicList(
+                fetchComic: () => getTopComicOfWeek(limit: 4),
+                title: " Truyện hot tuần 🔥",
+                onTapComic: _navigateToDetail,
+              ),
+            ),
 
-            // const SizedBox(height: 25),
+            const SizedBox(height: 10),
 
-            // SizedBox(
-            //   height: 240,
-            //   child: MangaList(
-            //     fetchManga: () => getTopMangaOfMonth(limit: 4),
-            //     title: "Comics of the Month",
-            //     onTapManga: _navigateToDetail,
-            //   ),
-            // ),
+            SizedBox(
+              height: 275,
+              child: ComicList(
+                fetchComic: () => getTopComicOfMonth(limit: 4),
+                title: " Truyện hot tháng 🔥",
+                onTapComic: _navigateToDetail,
+              ),
+            ),
           ],
         ),
       ),

@@ -1,141 +1,253 @@
 import 'package:flutter/material.dart';
+import 'package:rookiescomic_mobile/widgets/coin_packages.dart';
+import 'package:rookiescomic_mobile/widgets/subscription_plans.dart';
 
-class SubscriptionScreen extends StatelessWidget {
+class SubscriptionScreen extends StatefulWidget {
+  const SubscriptionScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
+
+class _SubscriptionScreenState extends State<SubscriptionScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int? selectedPackage;
+
+  final List<Map<String, dynamic>> coinPackages = [
+    {"id": 1, "coins": 100, "bonus": 10, "price": "20,000", "popular": false},
+    {"id": 2, "coins": 300, "bonus": 50, "price": "50,000", "popular": true},
+    {"id": 3, "coins": 500, "bonus": 100, "price": "80,000", "popular": false},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Chọn gói đăng ký",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0.5,
+        title: const Text(
+          'Nạp Xu',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      backgroundColor: Colors.black,
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildSubscriptionPlan(
-              title: "Gói Reader",
-              price: "30k VND/tháng",
-              description: "Đọc tất cả truyện không giới hạn.",
-              highlightText: "Đọc không giới hạn",
-              bgColor: Colors.grey[900]!,
-              borderColor: Colors.blueAccent,
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                buildBalanceSection(),
+                const SizedBox(height: 20),
+                buildTabBar(),
+                const SizedBox(height: 20),
+
+                // Sử dụng AnimatedBuilder để cập nhật UI khi đổi tab
+                AnimatedBuilder(
+                  animation: _tabController,
+                  builder: (context, child) {
+                    return _tabController.index == 1
+                        ? SubscriptionPlans()
+                        : CoinPackages(
+                          coinPackages: coinPackages,
+                          onSelected: (id) {
+                            setState(() {
+                              selectedPackage = id;
+                            });
+                          },
+                        );
+                  },
+                ),
+              ],
             ),
-            _buildSubscriptionPlan(
-              title: "Gói Author",
-              price: "45k VND/tháng",
-              description: "Có thể đăng truyện.",
-              highlightText: "Kiếm tiền cùng AI",
-              bgColor: Colors.grey[900]!,
-              borderColor: Colors.orange,
-            ),
-            _buildSubscriptionPlan(
-              title: "Gói Pro",
-              price: "60k VND/tháng",
-              description: "Đọc và đăng truyện, không quảng cáo.",
-              highlightText: "Phá bỏ giới hạn, tất cả trong tầm tay",
-              bgColor: Colors.grey[900]!,
-              borderColor: Colors.purple,
-            ),
-          ],
-        ),
+          ),
+
+          // Footer hiển thị phương thức thanh toán theo từng tab
+          AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, child) {
+              return _tabController.index == 0
+                  ? buildPaymentForCoins()
+                  : buildPaymentForSubscription();
+            },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSubscriptionPlan({
-    required String title,
-    required String price,
-    required String description,
-    required String highlightText,
-    required Color bgColor,
-    required Color borderColor,
-  }) {
+  /// **Hiển thị số dư xu của user**
+  Widget buildBalanceSection() {
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: Colors.blue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance_wallet,
+                color: Colors.blue[700],
+                size: 28,
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Số dư hiện tại',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '0 xu', // TODO: Lấy số dư từ API
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          OutlinedButton(
+            onPressed: () {
+              // TODO: Mở lịch sử giao dịch
+            },
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(40, 32),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: const Text(
+              'Lịch sử giao dịch',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// **Tab điều hướng giữa Gói Xu và Gói Đọc Truyện**
+  Widget buildTabBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Color(0xFF4D4FC1),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab, // Fix kích thước indicator
+        splashFactory: NoSplash.splashFactory, // Tắt hiệu ứng nhấp chuột
+        labelColor: Colors.white, // Chữ đậm hơn khi chọn
+        unselectedLabelColor: Colors.grey[600], // Chữ mờ hơn khi không chọn
+        tabs: const [Tab(text: 'Gói Xu'), Tab(text: 'Gói Đọc Truyện')],
+      ),
+    );
+  }
+
+  /// **Thanh toán MoMo cho Gói Xu**
+  Widget buildPaymentForCoins() {
+    final selectedPkg = coinPackages.firstWhere(
+      (p) => p["id"] == selectedPackage,
+      orElse: () => {"price": null},
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔥 Highlight Text (Ví dụ: "Dùng thử 7 ngày miễn phí")
+          const Text(
+            'Phương thức thanh toán',
+            style: TextStyle(fontSize: 14, color: Colors.black54),
+          ),
+          const SizedBox(height: 8),
           Container(
-            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: borderColor,
+              border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              highlightText,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            child: Row(
+              children: [
+                Image.network(
+                  'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png',
+                  height: 24,
+                  width: 24,
+                ),
+                const SizedBox(width: 8),
+                const Text('Ví MoMo', style: TextStyle(fontSize: 14)),
+              ],
             ),
           ),
-          SizedBox(height: 10),
-
-          // 🌟 Tiêu đề gói + Giá
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            price,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 10),
-
-          // 📌 Mô tả gói
-          Text(
-            description,
-            style: TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          SizedBox(height: 15),
-
-          // 🎯 Nút đăng ký
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
+            height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: Xử lý đăng ký
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: borderColor,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              onPressed: selectedPkg["price"] != null ? () {} : null,
+              child: Text(
+                selectedPkg["price"] != null
+                    ? 'Thanh toán ${selectedPkg["price"]}đ'
+                    : 'Chọn gói để thanh toán',
               ),
-              child: Text("Đăng ký ngay"),
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // 📌 Lưu ý nhỏ (nếu cần)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              "Bạn có thể huỷ bất cứ lúc nào.",
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+  /// **Thanh toán bằng Xu cho Gói Đọc Truyện**
+  Widget buildPaymentForSubscription() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const SizedBox(height: 20), // Tạo khoảng cách
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: () {
+                // TODO: Xử lý thanh toán bằng Xu ảo
+              },
+              child: const Text('Thanh toán bằng Xu ảo'),
             ),
           ),
         ],
