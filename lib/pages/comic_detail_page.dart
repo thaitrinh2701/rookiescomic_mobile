@@ -13,10 +13,10 @@ class ComicDetailPage extends StatefulWidget {
 
 class _ComicDetailPageState extends State<ComicDetailPage> {
   bool isSaved = false;
+  bool showFullDescription = false;
   int currentPage = 1;
   final int chaptersPerPage = 10;
   int totalPages = 1;
-
   final TextEditingController pageController = TextEditingController();
 
   @override
@@ -54,7 +54,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                 children: [
                   Positioned.fill(
                     child: CachedNetworkImage(
-                      imageUrl: widget.comic['cover_url']!,
+                      imageUrl: widget.comic['cover_url'] ?? '',
                       fit: BoxFit.cover,
                       errorWidget:
                           (context, url, error) =>
@@ -107,7 +107,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: CachedNetworkImage(
-                                  imageUrl: widget.comic['cover_url']!,
+                                  imageUrl: widget.comic['cover_url'] ?? '',
                                   width: 100,
                                   height: 140,
                                   fit: BoxFit.cover,
@@ -119,7 +119,8 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.comic['comic_name']!,
+                                      widget.comic['comic_name'] ??
+                                          'Không có tên',
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -128,7 +129,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Người đăng: ${widget.comic['user_id']}",
+                                      "Người đăng: ${widget.comic['user_id'] ?? 'Không rõ'}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
@@ -136,7 +137,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Lượt xem: ${widget.comic['view']}",
+                                      "Lượt xem: ${widget.comic['view'] ?? 0}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
@@ -163,7 +164,6 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -191,39 +191,12 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'report') {
-                            // Xử lý báo cáo
-                          }
-                        },
-                        itemBuilder:
-                            (context) => [
-                              const PopupMenuItem(
-                                value: 'report',
-                                child: Text('Báo cáo'),
-                              ),
-                            ],
-                        child: const Icon(Icons.more_vert, size: 28),
-                      ),
-                      const SizedBox(width: 10),
                       IconButton(
                         icon: Icon(
                           Icons.bookmark,
                           size: 28,
                           color:
-                              isSaved
-                                  ? const Color(0xFF4D4FC1)
-                                  : Colors.transparent,
-                        ),
-                        style: IconButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Color(0xFF4D4FC1),
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                              isSaved ? const Color(0xFF4D4FC1) : Colors.grey,
                         ),
                         onPressed: () {
                           setState(() {
@@ -233,69 +206,10 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .center, // Căn giữa các phần tử theo chiều dọc
-                    children: [
-                      const Text(
-                        "Danh sách chương:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ), // Khoảng cách giữa chữ và ô nhập
-                      IntrinsicHeight(
-                        // Giữ chiều cao đồng đều
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 35,
-                              child: TextField(
-                                controller: pageController,
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ), // Đồng bộ kích thước chữ
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ), // Giảm padding
-                                  isDense: true,
-                                ),
-                                onSubmitted: (value) {
-                                  int? page = int.tryParse(value);
-                                  if (page != null) {
-                                    goToPage(page);
-                                  }
-                                },
-                              ),
-                            ),
-                            const Text(" / ", style: TextStyle(fontSize: 16)),
-                            Text(
-                              "$totalPages",
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
           ),
-
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               int chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
@@ -313,35 +227,63 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
               );
             }, childCount: chaptersPerPage),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 30), // Nâng cao lên
+              padding: const EdgeInsets.only(bottom: 30),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Căn giữa
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
                     onPressed:
                         currentPage > 1
                             ? () => goToPage(currentPage - 1)
-                            : null, // Vô hiệu hóa khi ở trang 1
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      size: 32,
-                      color: Colors.black,
+                            : null,
+                    icon: const Icon(Icons.chevron_left, size: 32),
+                  ),
+                  const SizedBox(width: 8),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 35,
+                          child: TextField(
+                            controller: pageController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                              ),
+                              isDense: true,
+                            ),
+                            onSubmitted: (value) {
+                              int? page = int.tryParse(value);
+                              if (page != null) {
+                                goToPage(page);
+                              }
+                            },
+                          ),
+                        ),
+                        const Text(" / ", style: TextStyle(fontSize: 16)),
+                        Text(
+                          "$totalPages",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 40), // Khoảng cách giữa 2 nút
+                  const SizedBox(width: 8),
                   IconButton(
                     onPressed:
                         currentPage < totalPages
                             ? () => goToPage(currentPage + 1)
-                            : null, // Vô hiệu hóa khi ở trang cuối
-                    icon: const Icon(
-                      Icons.chevron_right,
-                      size: 32,
-                      color: Colors.black,
-                    ),
+                            : null,
+                    icon: const Icon(Icons.chevron_right, size: 32),
                   ),
                 ],
               ),

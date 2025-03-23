@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
+import 'package:rookiescomic_mobile/screens/search_screen.dart';
 import 'package:rookiescomic_mobile/widgets/below_comics.dart';
 import 'package:rookiescomic_mobile/widgets/top_comics.dart';
 
@@ -40,15 +41,15 @@ class _ComicsScreenState extends State<ComicScreen> {
         title: const Text('Rookies Comic'),
         toolbarHeight: 60,
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => const SearchScreen()),
-          //     );
-          //   },
-          //   icon: const Icon(Icons.search),
-          // ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
+              );
+            },
+            icon: const Icon(Icons.search),
+          ),
         ],
       ),
       extendBodyBehindAppBar: true,

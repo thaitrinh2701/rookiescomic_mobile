@@ -70,7 +70,8 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
         Duration(days: 2),
       ), // 2 ngày trước
       "quantity_chap": 12,
-      "description": "A cyberpunk world full of action.",
+      "description":
+          "Một câu chuyện không thể bỏ lỡ! Tiền truyện của Cyberpunk: Edgerunners đã xuất hiện! Bộ manga gốc kể về hai anh em Pilar và Rebecca đã chính thức bắt đầu... Đây là câu chuyện về hai anh em chạy khắp Night City để tạo dựng danh tiếng của mình như những Edgerunners...",
       "status": 1,
       "view": 7000,
       "genres_id": "action",
@@ -85,7 +86,8 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
         Duration(days: 5),
       ), // 5 ngày trước
       "quantity_chap": 25,
-      "description": "A spy comedy manga.",
+      "description":
+          "Một bộ truyện hài hành động về một gia đình giả bao gồm một điệp viên, một sát thủ và một nhà ngoại cảm! Điệp viên hàng đầu Twilight là bậc thầy trong việc trà trộn vào các nhiệm vụ nguy hiểm. Nhưng khi anh nhận được nhiệm vụ bất khả thi nhất—kết hôn và có con—có lẽ lần này anh đã gặp phải thử thách quá sức mình!",
       "status": 1,
       "view": 5000,
       "genres_id": "comedy",
@@ -100,7 +102,8 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
         Duration(days: 10),
       ), // 10 ngày trước
       "quantity_chap": 15,
-      "description": "A manga from the Touhou Project universe.",
+      "description":
+          "Bộ manga chính thức thứ năm của Touhou, được viết bởi ZUN và ban đầu được vẽ bởi Ginmokusei. Câu chuyện theo chân Satori Komeiji trong vai trò thám tử, giải quyết những bí ẩn trong thế giới Gensokyo.",
       "status": 1,
       "view": 6500,
       "genres_id": "mystery",
@@ -115,7 +118,8 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
         Duration(days: 20),
       ), // 20 ngày trước
       "quantity_chap": 20,
-      "description": "A story about elite assassins.",
+      "description":
+          "Takina Inoue, một nữ sinh trung học là thành viên của nhóm sát thủ toàn nữ 'Lycoris', bị kỷ luật vì chống lệnh để cứu đồng đội. Cô được chuyển đến làm việc với đặc vụ Lycoris xuất sắc Chisato Nishikigi tại một chi nhánh hoạt động dưới vỏ bọc quán cà phê 'LycoReco'.",
       "status": 1,
       "view": 7200,
       "genres_id": "action",
@@ -130,7 +134,8 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
         Duration(days: 28),
       ), // 28 ngày trước
       "quantity_chap": 10,
-      "description": "A sci-fi romance manga.",
+      "description":
+          "Câu chuyện tình yêu bùng cháy như một vụ nổ tên lửa! Đội Kinoshima Rocketry vô tình khiến một thành viên trong nhóm trở nên nổi tiếng khi video thử nghiệm động cơ của họ phát nổ. Trong khi Ayame Madoi thấy chuyện này kỳ lạ, cô lại hy vọng người mà cô thích cũng sẽ để ý đến mình...",
       "status": 1,
       "view": 4800,
       "genres_id": "sci-fi",
@@ -143,9 +148,10 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "user_id": "admin",
       "created_date": DateTime.now().subtract(
         Duration(days: 33),
-      ), // 33 ngày trước (ngoài phạm vi 1 tháng)
+      ), // 33 ngày trước
       "quantity_chap": 8,
-      "description": "A Pokémon adventure story.",
+      "description":
+          "Liko là một cô gái sở hữu mặt dây chuyền bí ẩn. Cô rất vui khi nhận được Pokémon đầu tiên của mình, Sprigatito, nhưng Sprigatito lại không chịu nghe lời cô chút nào...! Đây là manga chính thức kể về cuộc phiêu lưu của Liko và Sprigatito.",
       "status": 1,
       "view": 5300,
       "genres_id": "adventure",
@@ -158,9 +164,10 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "user_id": "admin",
       "created_date": DateTime.now().subtract(
         Duration(days: 50),
-      ), // 50 ngày trước (ngoài phạm vi 1 tháng)
+      ), // 50 ngày trước
       "quantity_chap": 139,
-      "description": "A post-apocalyptic battle for survival.",
+      "description":
+          "Hàng trăm năm trước, nhân loại suýt bị tuyệt chủng bởi Titan—những sinh vật khổng lồ chuyên ăn thịt người. Sống sót bên trong những bức tường khổng lồ, con người nghĩ rằng họ an toàn... cho đến ngày một Titan cao 60 mét phá vỡ bức tường ngoài cùng.",
       "status": 1,
       "view": 20000,
       "genres_id": "action",
@@ -171,11 +178,10 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "cover_url":
           "https://mangadex.org/covers/a1c7c817-4e59-43b7-9365-09675a149a6f/249fa95b-2214-4ae3-a8f7-77338fe34542.png",
       "user_id": "admin",
-      "created_date": DateTime.now().subtract(
-        Duration(days: 70),
-      ), // 70 ngày trước (ngoài phạm vi 1 tháng)
+      "created_date": DateTime.now().subtract(Duration(days: 70)),
       "quantity_chap": 1100,
-      "description": "A grand pirate adventure.",
+      "description":
+          "Một cuộc phiêu lưu hải tặc vĩ đại theo chân Luffy và băng Mũ Rơm trên hành trình tìm kiếm kho báu One Piece.",
       "status": 1,
       "view": 50000,
       "genres_id": "adventure",
@@ -186,11 +192,10 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "cover_url":
           "https://mangadex.org/covers/c071276e-abd4-4711-8b14-544431eb152a/d6860e8a-d13e-49d8-a6ad-1fa87f937a7a.jpg",
       "user_id": "admin",
-      "created_date": DateTime.now().subtract(
-        Duration(days: 15),
-      ), // 15 ngày trước
+      "created_date": DateTime.now().subtract(Duration(days: 15)),
       "quantity_chap": 10,
-      "description": "A romance fantasy story.",
+      "description":
+          "Hai người xa lạ tỉnh dậy trong cơ thể của nhau, bị cuốn vào một câu chuyện tình yêu kỳ diệu vượt thời gian.",
       "status": 1,
       "view": 15000,
       "genres_id": "romance",
@@ -201,11 +206,10 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "cover_url":
           "https://mangadex.org/covers/4141c5dc-c525-4df5-afd7-cc7d192a832f/92943ee9-92c3-43f9-96e2-d73515ace108.jpg",
       "user_id": "admin",
-      "created_date": DateTime.now().subtract(
-        Duration(days: 3),
-      ), // 3 ngày trước
+      "created_date": DateTime.now().subtract(Duration(days: 3)),
       "quantity_chap": 30,
-      "description": "A high-stakes football competition.",
+      "description":
+          "Một cuộc thi khốc liệt để tìm ra tiền đạo xuất sắc nhất Nhật Bản, quyết định tương lai của bóng đá nước này.",
       "status": 1,
       "view": 18000,
       "genres_id": "sports",
