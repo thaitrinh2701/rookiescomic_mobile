@@ -1,0 +1,101 @@
+{
+  "project_info": {
+    "project_number": "999792480834",
+    "firebase_url": "https://rookiescomics-default-rtdb.firebaseio.com",
+    "project_id": "rookiescomics",
+    "storage_bucket": "rookiescomics.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999792480834:android:63c0e1e91c55c64935d3db",
+        "android_client_info": {
+          "package_name": "com.example.rookiescomic_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999792480834-0ehg1rnvh8dqpdhl6o3q8ur5hta6gbge.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rookiescomic_mobile",
+            "certificate_hash": "991b8825f2592af31ed2ae34b9e01524adfef4f7"
+          }
+        },
+        {
+          "client_id": "999792480834-f1evrctb40e7g73grs7hgmkpfg1s2tb0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_VP-r0W22YEdhlglz0Op4BKTZej30tJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999792480834-f1evrctb40e7g73grs7hgmkpfg1s2tb0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999792480834:android:3d96dc1f34599b8a35d3db",
+        "android_client_info": {
+          "package_name": "com.rookiescomic.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999792480834-d8vjkt265gv96m7lfn5p7ajj52spupgc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rookiescomic.app",
+            "certificate_hash": "991b8825f2592af31ed2ae34b9e01524adfef4f7"
+          }
+        },
+        {
+          "client_id": "999792480834-ph08fbuulo0f6h8o0j9bito9avgdmo76.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rookiescomic.app",
+            "certificate_hash": "3bcb7c964b98cb8db1cff901421c5c5ffd996d0d"
+          }
+        },
+        {
+          "client_id": "999792480834-qe6bbv514e2iuumjhf85tp36h3a6ns5s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rookiescomic.app",
+            "certificate_hash": "07bc0922a4387f371e74d93cb7db6ac90dfbb8c4"
+          }
+        },
+        {
+          "client_id": "999792480834-f1evrctb40e7g73grs7hgmkpfg1s2tb0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_VP-r0W22YEdhlglz0Op4BKTZej30tJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999792480834-f1evrctb40e7g73grs7hgmkpfg1s2tb0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
