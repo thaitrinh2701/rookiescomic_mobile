@@ -35,9 +35,10 @@ class _CoinPackagesState extends State<CoinPackages> {
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: selectedPackage == pkg["id"]
-                      ? Color(0xFF4D4FC1)
-                      : Colors.grey.shade300,
+                  color:
+                      selectedPackage == pkg["id"]
+                          ? Color(0xFF4D4FC1)
+                          : Colors.grey.shade300,
                   width: selectedPackage == pkg["id"] ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -160,24 +161,32 @@ class _CoinPackagesState extends State<CoinPackages> {
 
         /// Nút Thanh toán ở cuối màn hình
         ElevatedButton(
-          onPressed: selectedPackage != null
-              ? () {
-                  final selectedPkg = widget.coinPackages.firstWhere(
-                      (pkg) => pkg["id"] == selectedPackage);
-                  widget.onPayment(
-                    selectedPkg["price"].toString(),
-                    selectedPkg["coins"].toString(),
-                  ); // Gọi hàm thanh toán
-                }
-              : null,
+          onPressed:
+              selectedPackage != null
+                  ? () {
+                    final selectedPkg = widget.coinPackages.firstWhere(
+                      (pkg) => pkg["id"] == selectedPackage,
+                    );
+                    widget.onPayment(
+                      selectedPkg["price"].toString(),
+                      selectedPkg["coins"].toString(),
+                    ); // Gọi hàm thanh toán
+                  }
+                  : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: selectedPackage != null ? Colors.blue : Colors.grey,
+            backgroundColor:
+                selectedPackage != null ? Colors.blue : Colors.grey,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          child: Text(selectedPackage != null
-              ? 'Thanh toán ${widget.coinPackages.firstWhere((pkg) => pkg["id"] == selectedPackage)["price"]}đ'
-              : 'Chọn gói xu'),
+          child: Text(
+            selectedPackage != null
+                ? 'Thanh toán ${widget.coinPackages.firstWhere((pkg) => pkg["id"] == selectedPackage)["price"]}đ'
+                : 'Chọn gói xu',
+          ),
         ),
       ],
     );

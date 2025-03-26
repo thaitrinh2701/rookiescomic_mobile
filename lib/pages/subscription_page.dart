@@ -39,11 +39,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
 
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     setState(() {
       userId = prefs.getString("user_id");
       token = prefs.getString("backend_token");
-      
+
       // Sửa lỗi lấy role bị lỗi kiểu dữ liệu
       String? roleString = prefs.getString("role");
       role = roleString != null ? int.tryParse(roleString) : null;
@@ -57,114 +57,126 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     _fetchBalance();
   }
 
-
   Future<void> _fetchBalance() async {
-  if (userId == null || token == null) return;
+    if (userId == null || token == null) return;
 
-  try {
-    // Gọi API lấy số xu trong ví chính
-    final mainWalletResponse = await http.get(
-      Uri.parse('http://10.0.2.2:8080/wallets/$userId/main-wallet'),
-      headers: {"Authorization": "Bearer $token"},
-    );
-
-    if (mainWalletResponse.statusCode == 200) {
-      final mainWalletData = jsonDecode(mainWalletResponse.body);
-      setState(() {
-        double balanceValue = (mainWalletData['balance'] as num).toDouble();
-        balance = "${balanceValue.toInt()} xu";  // Chuyển số thập phân về số nguyên
-      });
-    }
-
-    // Nếu user có role 7 hoặc 8, gọi API lấy ví khuyến mãi
-    if (role == 7 || role == 8) {
-      final promoWalletResponse = await http.get(
-        Uri.parse('http://10.0.2.2:8080/wallets/$userId/promotion-wallet'),
+    try {
+      // Gọi API lấy số xu trong ví chính
+      final mainWalletResponse = await http.get(
+        Uri.parse('http://10.0.2.2:8080/wallets/$userId/main-wallet'),
         headers: {"Authorization": "Bearer $token"},
       );
 
-      if (promoWalletResponse.statusCode == 200) {
-        final promoWalletData = jsonDecode(promoWalletResponse.body);
+      if (mainWalletResponse.statusCode == 200) {
+        final mainWalletData = jsonDecode(mainWalletResponse.body);
         setState(() {
-          double promoBalanceValue = (promoWalletData['balance'] as num).toDouble();
-          promotionBalance = "${promoBalanceValue.toInt()} xu";  // Chuyển số thập phân về số nguyên
+          double balanceValue = (mainWalletData['balance'] as num).toDouble();
+          balance =
+              "${balanceValue.toInt()} xu"; // Chuyển số thập phân về số nguyên
         });
       }
-    }
-  } catch (e) {
-    print("Lỗi khi lấy số dư: $e");
-  }
-}
 
+      // Nếu user có role 7 hoặc 8, gọi API lấy ví khuyến mãi
+      if (role == 7 || role == 8) {
+        final promoWalletResponse = await http.get(
+          Uri.parse('http://10.0.2.2:8080/wallets/$userId/promotion-wallet'),
+          headers: {"Authorization": "Bearer $token"},
+        );
+
+        if (promoWalletResponse.statusCode == 200) {
+          final promoWalletData = jsonDecode(promoWalletResponse.body);
+          setState(() {
+            double promoBalanceValue =
+                (promoWalletData['balance'] as num).toDouble();
+            promotionBalance =
+                "${promoBalanceValue.toInt()} xu"; // Chuyển số thập phân về số nguyên
+          });
+        }
+      }
+    } catch (e) {
+      print("Lỗi khi lấy số dư: $e");
+    }
+  }
 
   void buyCoinPackage(String price, String coin) async {
-  if (userId == null || token == null) {
-    showSnackbar("Vui lòng đăng nhập để tiếp tục!");
-    return;
-  }
-
-  // Debug: In ra thông tin giao dịch
-  print("DEBUG: Mua gói xu: $coin xu với giá $price VNĐ cho userId $userId");
-
-  String returnUrl = "rookiescomic://momo-payment";
-  String ipnUrl = "http://10.0.2.2:8080/momo/ipn-handler";
-
-  try {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/momo/create'),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode({
-        "price": price,
-        "coin": coin,
-        "userId": userId,
-        "returnUrl": returnUrl,
-        "ipnUrl": ipnUrl,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      String? payUrl = data['payUrl'];
-
-      if (payUrl != null) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Thanh toán MoMo"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset("assets/images/vi-momo.jpg", height: 200, fit: BoxFit.cover),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Đóng")),
-              TextButton(
-                onPressed: () => launchUrl(Uri.parse(payUrl), mode: LaunchMode.externalApplication),
-                child: const Text("Mở MoMo"),
-              ),
-            ],
-          ),
-        );
-      } else {
-        showSnackbar("Không thể mở MoMo. Vui lòng thử lại!");
-      }
-    } else {
-      showSnackbar("Lỗi khi tạo đơn hàng. Mã lỗi: ${response.statusCode}");
+    if (userId == null || token == null) {
+      showSnackbar("Vui lòng đăng nhập để tiếp tục!");
+      return;
     }
-  } catch (e) {
-    showSnackbar("Đã có lỗi xảy ra. Vui lòng thử lại!");
-  }
-}
 
+    // Debug: In ra thông tin giao dịch
+    print("DEBUG: Mua gói xu: $coin xu với giá $price VNĐ cho userId $userId");
+
+    String returnUrl = "rookiescomic://momo-payment";
+    String ipnUrl = "http://10.0.2.2:8080/momo/ipn-handler";
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/momo/create'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "price": price,
+          "coin": coin,
+          "userId": userId,
+          "returnUrl": returnUrl,
+          "ipnUrl": ipnUrl,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String? payUrl = data['payUrl'];
+
+        if (payUrl != null) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text("Thanh toán MoMo"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        "assets/images/vi-momo.jpg",
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Đóng"),
+                    ),
+                    TextButton(
+                      onPressed:
+                          () => launchUrl(
+                            Uri.parse(payUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                      child: const Text("Mở MoMo"),
+                    ),
+                  ],
+                ),
+          );
+        } else {
+          showSnackbar("Không thể mở MoMo. Vui lòng thử lại!");
+        }
+      } else {
+        showSnackbar("Lỗi khi tạo đơn hàng. Mã lỗi: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar("Đã có lỗi xảy ra. Vui lòng thử lại!");
+    }
+  }
 
   void showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -195,16 +207,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                     return _tabController.index == 1
                         ? SubscriptionPlans()
                         : CoinPackages(
-                            coinPackages: coinPackages,
-                            onSelected: (id) {
-                              setState(() {
-                                selectedPackage = id;
-                              });
-                            },
-                            onPayment: (price, coins) {
-                              buyCoinPackage(price, coins);
-                            },
-                          );
+                          coinPackages: coinPackages,
+                          onSelected: (id) {
+                            setState(() {
+                              selectedPackage = id;
+                            });
+                          },
+                          onPayment: (price, coins) {
+                            buyCoinPackage(price, coins);
+                          },
+                        );
                   },
                 ),
               ],
@@ -235,13 +247,26 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         children: [
           Row(
             children: [
-              Icon(Icons.account_balance_wallet, color: Colors.blue[700], size: 28),
+              Icon(
+                Icons.account_balance_wallet,
+                color: Colors.blue[700],
+                size: 28,
+              ),
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Số dư hiện tại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                  Text(balance, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Số dư hiện tại',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    balance,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -256,8 +281,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Xu khuyến mãi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                      Text(promotionBalance, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                      const Text(
+                        'Xu khuyến mãi',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        promotionBalance,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -279,27 +317,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   }
 
   Widget buildPaymentForCoins() {
-  final selectedPkg = coinPackages.firstWhere(
-    (p) => p["id"] == selectedPackage,
-    orElse: () => {"price": null, "coins": null},
-  );
+    final selectedPkg = coinPackages.firstWhere(
+      (p) => p["id"] == selectedPackage,
+      orElse: () => {"price": null, "coins": null},
+    );
 
-  return Container(
-    padding: const EdgeInsets.all(16),
-    child: ElevatedButton(
-      onPressed: selectedPkg["price"] != null
-          ? () => buyCoinPackage(
-              selectedPkg["price"].toString(),
-              selectedPkg["coins"].toString(),
-            )
-          : null,
-      child: Text(selectedPkg["price"] != null
-          ? 'Thanh toán ${selectedPkg["price"]}đ'
-          : 'Chọn gói để thanh toán'),
-    ),
-  );
-}
-
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed:
+            selectedPkg["price"] != null
+                ? () => buyCoinPackage(
+                  selectedPkg["price"].toString(),
+                  selectedPkg["coins"].toString(),
+                )
+                : null,
+        child: Text(
+          selectedPkg["price"] != null
+              ? 'Thanh toán ${selectedPkg["price"]}đ'
+              : 'Chọn gói để thanh toán',
+        ),
+      ),
+    );
+  }
 
   Widget buildPaymentForSubscription() {
     return Container(

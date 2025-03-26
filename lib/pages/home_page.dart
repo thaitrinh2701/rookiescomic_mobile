@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart';
+import 'package:rookiescomic_mobile/screens/category_screen.dart';
 import 'package:rookiescomic_mobile/screens/comic_screen.dart';
 import 'package:rookiescomic_mobile/screens/setting_screen.dart';
 
@@ -45,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     // const Center(child: Text('Comic')),
     const ComicScreen(),
-    const Center(child: Text('Danh mục')),
+    const CategoryScreen(),
     const Center(child: Text('Thư viện')),
     const SettingScreen(),
   ];

@@ -206,6 +206,83 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Giới thiệu",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AnimatedCrossFade(
+                        firstChild: Text(
+                          widget.comic['description'] ?? 'Không có mô tả',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[800],
+                            height: 1.5,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        secondChild: Text(
+                          widget.comic['description'] ?? 'Không có mô tả',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[800],
+                            height: 1.5,
+                          ),
+                        ),
+                        crossFadeState:
+                            showFullDescription
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                        duration: const Duration(milliseconds: 300),
+                      ),
+
+                      if ((widget.comic['description'] ?? '').length > 100)
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showFullDescription = !showFullDescription;
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(50, 30),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.centerLeft,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                showFullDescription ? 'Thu gọn' : 'Xem thêm',
+                                style: TextStyle(
+                                  color: const Color(0xFF4D4FC1),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Icon(
+                                showFullDescription
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: const Color(0xFF4D4FC1),
+                                size: 18,
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
