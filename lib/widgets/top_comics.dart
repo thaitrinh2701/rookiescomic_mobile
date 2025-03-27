@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/components/loader.dart';
-import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/widgets/top_comics_slider.dart';
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class TopComicList extends StatelessWidget {
   const TopComicList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: getFeatureComic(rankingType: 'all', limit: 4),
+    return FutureBuilder<List<Map<String, String>>>(
+      future: () async {
+        final comics = await fetchTopMonthComics(limit: 4);
+        return comics
+            .map(
+              (comic) =>
+                  comic.toJson().map((k, v) => MapEntry(k, v.toString())),
+            )
+            .toList();
+      }(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Loader();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:rookiescomic_mobile/widgets/coin_packages.dart';
 import 'package:rookiescomic_mobile/widgets/subscription_plans.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart'; // Add this import
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({Key? key}) : super(key: key);
+  const SubscriptionScreen({super.key});
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();

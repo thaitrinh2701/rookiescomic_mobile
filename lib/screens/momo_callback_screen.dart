@@ -5,7 +5,7 @@ import 'dart:convert';
 
 class MoMoCallbackScreen extends StatefulWidget {
   final Uri uri;
-  const MoMoCallbackScreen({Key? key, required this.uri}) : super(key: key);
+  const MoMoCallbackScreen({super.key, required this.uri});
 
   @override
   _MoMoCallbackScreenState createState() => _MoMoCallbackScreenState();
@@ -23,8 +23,10 @@ class _MoMoCallbackScreenState extends State<MoMoCallbackScreen> {
   Future<void> _handleMomoPayment() async {
     final orderId = widget.uri.queryParameters["orderId"] ?? "";
     final requestId = widget.uri.queryParameters["requestId"] ?? "";
-    final resultCode = int.tryParse(widget.uri.queryParameters["resultCode"] ?? "99") ?? 99;
-    final extraData = widget.uri.queryParameters["extraData"] ?? ""; // Lấy extraData từ URL
+    final resultCode =
+        int.tryParse(widget.uri.queryParameters["resultCode"] ?? "99") ?? 99;
+    final extraData =
+        widget.uri.queryParameters["extraData"] ?? ""; // Lấy extraData từ URL
 
     if (orderId.isEmpty || requestId.isEmpty) {
       print("Thiếu orderId hoặc requestId, không thể gửi lên server.");
@@ -57,16 +59,16 @@ class _MoMoCallbackScreenState extends State<MoMoCallbackScreen> {
       context,
       MaterialPageRoute(builder: (context) => HomePage()),
     );
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _isProcessing
-            ? CircularProgressIndicator()
-            : Text("Xử lý hoàn tất, đang chuyển về trang chủ..."),
+        child:
+            _isProcessing
+                ? CircularProgressIndicator()
+                : Text("Xử lý hoàn tất, đang chuyển về trang chủ..."),
       ),
     );
   }

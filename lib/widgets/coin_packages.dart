@@ -7,12 +7,12 @@ class CoinPackages extends StatefulWidget {
   final bool isLoggedIn;
 
   const CoinPackages({
-    Key? key,
+    super.key,
     required this.onSelected,
     required this.onPayment,
     required this.coinPackages,
     this.isLoggedIn = true,
-  }) : super(key: key);
+  });
 
   @override
   State<CoinPackages> createState() => _CoinPackagesState();

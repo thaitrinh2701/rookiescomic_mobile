@@ -5,27 +5,27 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rookiescomic_mobile/pages/home_page.dart';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 Future<void> signInWithGoogle(BuildContext context) async {
   try {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Bạn đã hủy đăng nhập.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Bạn đã hủy đăng nhập.")));
       return;
     }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    final UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
+    final UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithCredential(credential);
     final User? user = userCredential.user;
 
     if (user == null) {
@@ -33,9 +33,6 @@ Future<void> signInWithGoogle(BuildContext context) async {
     }
 
     String? firebaseIdToken = await user.getIdToken();
-    if (firebaseIdToken == null) {
-      throw Exception("Failed to retrieve Firebase ID Token");
-    }
 
     print("Firebase ID Token: $firebaseIdToken");
 
@@ -105,7 +102,9 @@ Map<String, dynamic> decodeJWT(String token) {
       throw Exception("Invalid token format");
     }
 
-    String payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+    String payload = utf8.decode(
+      base64Url.decode(base64Url.normalize(parts[1])),
+    );
     Map<String, dynamic> jsonPayload = jsonDecode(payload);
 
     return jsonPayload;

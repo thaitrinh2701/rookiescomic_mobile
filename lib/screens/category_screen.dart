@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart'; // Add this import
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class CategoryScreen extends StatefulWidget {
-  const CategoryScreen({Key? key}) : super(key: key);
+  const CategoryScreen({super.key});
 
   @override
   State<CategoryScreen> createState() => _CategoryScreenState();
@@ -42,12 +43,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
     });
 
     try {
-      final allComics = await getAllComics();
+      final allComics = await fetchAllComics();
 
       // Convert dynamic values to strings for display
       final formattedComics =
           allComics.map((comic) {
-            return comic.map((key, value) => MapEntry(key, value.toString()));
+            return comic.toJson().map(
+              (key, value) => MapEntry(key, value.toString()),
+            );
           }).toList();
 
       setState(() {

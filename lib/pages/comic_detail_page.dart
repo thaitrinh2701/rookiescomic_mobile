@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart'; // Add this import
+import 'package:rookiescomic_mobile/models/comics.dart';
 
 class ComicDetailPage extends StatefulWidget {
   final Map<String, dynamic> comic;
@@ -138,7 +138,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Người đăng: ${widget.comic['user_id'] ?? 'Không rõ'}",
+                                      "Người đăng: ${widget.comic['poster_name'] ?? 'Không rõ'}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,

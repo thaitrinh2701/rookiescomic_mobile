@@ -24,7 +24,7 @@ class ComicList extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return Text('Error: \${snapshot.error}');
+          return Text('Error: ${snapshot.error}');
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {

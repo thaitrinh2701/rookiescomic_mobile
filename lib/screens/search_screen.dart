@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -11,24 +11,31 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> allComics = []; // lấy truyện từ API
-  List<Map<String, dynamic>> filteredComics = []; // lấy truyện lọc
+  List<Map<String, String>> allComics = [];
+  List<Map<String, String>> filteredComics = [];
   bool isLoading = false;
-  bool hasSearched =
-      false; // kiểm tra search chưa, để có gì đổi lại giá trị khi người ta bấm nút search lại
+  bool hasSearched = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchAllComics(); // Load tất cả truyện một lần khi mở trang, để đỡ bị sida
+    _fetchAllComics();
   }
 
   Future<void> _fetchAllComics() async {
     setState(() => isLoading = true);
     try {
-      allComics = await getAllComics(); // API lấy danh sách chuyện
+      final comics = await fetchAllComics();
+      allComics =
+          comics
+              .map(
+                (comic) => comic.toJson().map(
+                  (key, value) => MapEntry(key, value.toString()),
+                ),
+              )
+              .toList();
     } catch (e) {
-      print("Error fetching comics: $e");
+      print("❌ Error fetching comics: $e");
     }
     setState(() => isLoading = false);
   }
@@ -58,7 +65,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
+      appBar: AppBar(title: const Text('Tìm kiếm truyện')),
       body: Column(
         children: [
           // Ô tìm kiếm
@@ -73,16 +80,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              onChanged: _filterComics, // Gợi ý ngay khi nhập, fill liền
+              onChanged: _filterComics,
             ),
           ),
-          // Hiển thị Gợi ý
+          // Danh sách kết quả
           Expanded(
             child:
-                filteredComics.isEmpty && hasSearched
-                    ? const Center(
-                      child: Text("Hiện không có truyện này"),
-                    ) // Không có kết quả
+                isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : filteredComics.isEmpty && hasSearched
+                    ? const Center(child: Text("Hiện không có truyện này"))
                     : ListView.builder(
                       padding: const EdgeInsets.all(8.0),
                       itemCount: filteredComics.length,
@@ -101,7 +108,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                       const Icon(Icons.broken_image, size: 50),
                             ),
                           ),
-                          title: Text(comic["comic_name"] ?? "Unknown"),
+                          title: Text(comic["comic_name"] ?? "Không rõ"),
                           subtitle: Text(
                             comic["description"] ?? "Không có mô tả",
                             maxLines: 1,

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/apis/google_signin.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -67,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildLogo() {
-    return Container(
+    return SizedBox(
       width: 250,
       height: 100,
       child: Image.asset("assets/images/logo_2.png", fit: BoxFit.contain),

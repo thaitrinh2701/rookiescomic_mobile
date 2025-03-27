@@ -9,11 +9,11 @@ class ReadingComicScreen extends StatefulWidget {
   final int initialPageIndex;
 
   const ReadingComicScreen({
-    Key? key,
+    super.key,
     required this.comic,
     this.initialChapterIndex = 0,
     this.initialPageIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   State<ReadingComicScreen> createState() => _ReadingComicScreenState();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rookiescomic_mobile/models/comics.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:rookiescomic_mobile/screens/search_screen.dart';
 import 'package:rookiescomic_mobile/widgets/below_comics.dart';
 import 'package:rookiescomic_mobile/widgets/top_comics.dart';
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class ComicScreen extends StatefulWidget {
   const ComicScreen({super.key});
@@ -65,7 +65,13 @@ class _ComicsScreenState extends State<ComicScreen> {
             SizedBox(
               height: 275,
               child: ComicList(
-                fetchComic: () => getTopComicOfWeek(limit: 4),
+                fetchComic: () async {
+                  final comics = await fetchTopWeekComics(limit: 4);
+                  return comics
+                      .take(4)
+                      .map((comic) => comic.toStringMap())
+                      .toList();
+                },
                 title: " Truyện hot tuần 🔥",
                 onTapComic: _navigateToDetail,
               ),
@@ -76,7 +82,13 @@ class _ComicsScreenState extends State<ComicScreen> {
             SizedBox(
               height: 275,
               child: ComicList(
-                fetchComic: () => getTopComicOfMonth(limit: 4),
+                fetchComic: () async {
+                  final comics = await fetchTopMonthComics(limit: 4);
+                  return comics
+                      .take(4)
+                      .map((comic) => comic.toStringMap())
+                      .toList();
+                },
                 title: " Truyện hot tháng 🔥",
                 onTapComic: _navigateToDetail,
               ),
