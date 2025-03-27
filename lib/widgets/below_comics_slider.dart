@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:rookiescomic_mobile/pages/view_all_comics_page.dart';
 
 class ComicSlider extends StatefulWidget {
   final List<Map<String, String>> comics;
@@ -42,37 +43,17 @@ class _ComicSliderState extends State<ComicSlider> {
               ),
               GestureDetector(
                 onTap: () {
-                  if (widget.comics.isNotEmpty) {
-                    if (!mounted) return;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => Scaffold(
-                              appBar: AppBar(title: Text(widget.title)),
-                              body: ListView(
-                                children:
-                                    widget.comics.map((comic) {
-                                      return ListTile(
-                                        title: Text(
-                                          comic["comic_name"] ?? "Không có",
-                                        ),
-                                        leading: Image.network(
-                                          comic["cover_url"] ?? "",
-                                        ),
-                                      );
-                                    }).toList(),
-                              ),
-                            ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Truyện hiện không khả dụng"),
-                      ),
-                    );
-                  }
+                  // Navigate to the AllComicsListPage instead of creating a new scaffold
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => AllComicsListPage(
+                            title: widget.title,
+                            comics: widget.comics,
+                          ),
+                    ),
+                  );
                 },
                 child: const Text(
                   "Tất cả",

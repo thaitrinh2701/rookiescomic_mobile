@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
+import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart'; // Add this import
 
 class ComicDetailPage extends StatefulWidget {
   final Map<String, dynamic> comic;
@@ -18,6 +19,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
   final int chaptersPerPage = 10;
   int totalPages = 1;
   final TextEditingController pageController = TextEditingController();
+  bool isAscendingOrder = true; // New state variable for sorting order
 
   @override
   void initState() {
@@ -33,6 +35,13 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
     setState(() {
       currentPage = page;
       pageController.text = currentPage.toString();
+    });
+  }
+
+  // New method to toggle sorting order
+  void toggleSortOrder() {
+    setState(() {
+      isAscendingOrder = !isAscendingOrder;
     });
   }
 
@@ -173,7 +182,12 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            // Start reading from the first chapter
+                            if (quantityChap > 0) {
+                              _navigateToReadingScreen(0);
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -282,15 +296,73 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
 
                   const SizedBox(height: 16),
                   const Divider(),
+
+                  // Add chapter header with sort button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Danh sách chương",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: toggleSortOrder,
+                          borderRadius: BorderRadius.circular(4),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  isAscendingOrder ? "Tăng dần" : "Giảm dần",
+                                  style: TextStyle(
+                                    color: const Color(0xFF4D4FC1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  isAscendingOrder
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
+                                  color: const Color(0xFF4D4FC1),
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const SizedBox(height: 8),
                 ],
               ),
             ),
           ),
+          // Modified SliverList to account for sorting order
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              int chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
-              if (chapNumber > quantityChap) return null;
+              // Determine chapter number based on sorting order
+              int chapNumber;
+              if (isAscendingOrder) {
+                // Ascending: Start from the beginning of the current page
+                chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
+              } else {
+                // Descending: Start from the end and go backwards
+                chapNumber =
+                    quantityChap -
+                    ((currentPage - 1) * chaptersPerPage + index);
+              }
+
+              // Check if chapNumber is valid
+              if (chapNumber <= 0 || chapNumber > quantityChap) return null;
+
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: const Color(0xFF4D4FC1),
@@ -300,10 +372,20 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                   ),
                 ),
                 title: Text("Chương $chapNumber"),
+                subtitle: Text(
+                  "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  // Convert to zero-based index for the chapter array
+                  int chapterIndex = chapNumber - 1;
+                  _navigateToReadingScreen(chapterIndex);
+                },
               );
             }, childCount: chaptersPerPage),
           ),
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 30),
@@ -369,5 +451,59 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
         ],
       ),
     );
+  }
+
+  // Helper method to navigate to reading screen
+  void _navigateToReadingScreen(int chapterIndex) {
+    // Check if the comic data includes chapters
+    if (widget.comic['chapters'] == null) {
+      // If no chapters data in comic, try to find a mock chapter or show error
+      final comicWithChapters = {
+        ...widget.comic,
+        'chapters': [
+          {
+            'chapter_id': '1',
+            'chapter_name': 'Chương ${chapterIndex + 1}',
+            'created_date': DateTime.now().subtract(
+              Duration(days: chapterIndex + 1),
+            ),
+            'view': widget.comic['view'] ?? 0,
+            'chapter_content': List.generate(
+              5,
+              (index) => {
+                'content_id': '$index',
+                'content_url':
+                    'https://via.placeholder.com/800x1200/4D4FC1/FFFFFF?text=Page+${index + 1}',
+              },
+            ),
+          },
+        ],
+      };
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => ReadingComicScreen(
+                comic: comicWithChapters,
+                initialChapterIndex: 0,
+                initialPageIndex: 0,
+              ),
+        ),
+      );
+    } else {
+      // Navigate with the existing chapters data
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => ReadingComicScreen(
+                comic: widget.comic,
+                initialChapterIndex: chapterIndex,
+                initialPageIndex: 0,
+              ),
+        ),
+      );
+    }
   }
 }
