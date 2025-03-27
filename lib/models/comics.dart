@@ -1,4 +1,5 @@
 import 'package:rookiescomic_mobile/models/users.dart';
+import 'chapter.dart';
 
 class Comic {
   final String comicId;
@@ -12,6 +13,7 @@ class Comic {
   final int view;
   final String genresId;
   final User? user;
+  List<Chapter>? chapters;
 
   Comic({
     required this.comicId,
@@ -25,10 +27,31 @@ class Comic {
     required this.view,
     required this.genresId,
     required this.user,
+    this.chapters,
   });
 
   // Convert JSON sang object
   factory Comic.fromJson(Map<String, dynamic> json) {
+    // Handle missing user_id
+    String userId = '';
+    if (json["user_id"] != null) {
+      userId = json["user_id"].toString();
+    }
+
+    // Handle created_date
+    DateTime createdDate;
+    try {
+      if (json["created_date"] is DateTime) {
+        createdDate = json["created_date"];
+      } else if (json["created_date"] != null) {
+        createdDate = DateTime.parse(json["created_date"].toString());
+      } else {
+        createdDate = DateTime.now();
+      }
+    } catch (e) {
+      createdDate = DateTime.now();
+    }
+
     return Comic(
       comicId: json["comicId"] ?? "",
       comicName: json["comicName"] ?? "",
@@ -59,6 +82,7 @@ class Comic {
       "status": status,
       "view": view,
       "genres_id": genresId,
+      "chapters": chapters?.map((c) => c.toJson()).toList(),
     };
   }
 
@@ -359,6 +383,7 @@ class Comic {
 //   return data.take(limit).toList();
 // }
 
+// Make formatDate function available for other files to import
 String formatDate(dynamic dateInput) {
   if (dateInput == null) return "Không xác định"; // Kiểm tra null
 
@@ -382,76 +407,54 @@ String formatDate(dynamic dateInput) {
   return formattedDate;
 }
 
-// Future<List<Map<String, String>>> getFeatureManga({
+// // **Lấy top truyện theo tuần (7 ngày)**
+// Future<List<Map<String, dynamic>>> getTopComicOfWeek({
+//   required int limit,
+// }) async {
+//   List<Map<String, dynamic>> allManga = await getAllComics();
+//   DateTime now = DateTime.now();
+//   DateTime oneWeekAgo = now.subtract(Duration(days: 7));
+
+//   return allManga
+//       .where((manga) => manga["created_date"].isAfter(oneWeekAgo))
+//       .toList()
+//     ..sort((a, b) => b["view"].compareTo(a["view"]))
+//     ..take(limit).toList();
+// }
+
+// // **Lấy top truyện theo tháng (30 ngày)**
+// Future<List<Map<String, dynamic>>> getTopComicOfMonth({
+//   required int limit,
+// }) async {
+//   List<Map<String, dynamic>> allManga = await getAllComics();
+//   DateTime now = DateTime.now();
+//   DateTime oneMonthAgo = now.subtract(Duration(days: 30));
+
+//   return allManga
+//       .where((manga) => manga["created_date"].isAfter(oneMonthAgo))
+//       .toList()
+//     ..sort((a, b) => b["view"].compareTo(a["view"]))
+//     ..take(limit).toList();
+// }
+
+// // **Lấy truyện nổi bật**
+// Future<List<Map<String, dynamic>>> getFeatureComic({
 //   required String rankingType,
 //   required int limit,
 // }) async {
 //   await Future.delayed(Duration(seconds: 1)); // Giả lập thời gian tải dữ liệu
 
-//   List<Map<String, dynamic>> data = [
-//     {
-//       "comic_id": "1",
-//       "comic_name": "Touhou Chireikiden: Hansoku Tantei Satori",
-//       "cover_url":
-//           "https://mangadex.org/covers/f4fa3679-6918-4684-bcb6-377c9f336898/31d5e78e-a8f2-44fd-b1b0-94828a4f7fd4.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "15",
-//       "description": "A manga from the Touhou Project universe.",
-//       "status": "1",
-//       "category": "week",
-//     },
-//     {
-//       "comic_id": "2",
-//       "comic_name": "Lycoris Recoil",
-//       "cover_url":
-//           "https://mangadex.org/covers/9c21fbcd-e22e-4e6d-8258-7d580df9fc45/0184636a-f44c-4073-9b55-435120755e47.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "20",
-//       "description": "An action-packed story about secret agents.",
-//       "status": "1",
-//       "category": "week",
-//     },
-//     {
-//       "comic_id": "3",
-//       "comic_name": "Houkago Bokura wa Uchuu ni Madou",
-//       "cover_url":
-//           "https://mangadex.org/covers/91a2e0c9-cd81-4bf7-b5f7-bb37434bf6b3/7a41b522-5383-422b-b6b4-fc2007f5c603.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "10",
-//       "description": "A sci-fi romance manga.",
-//       "status": "1",
-//       "category": "month",
-//     },
-//     {
-//       "comic_id": "4",
-//       "comic_name": "Pocket Monsters: Liko's Treasure",
-//       "cover_url":
-//           "https://mangadex.org/covers/39c2752b-0d08-4bdc-8f99-4ac273fd194a/10f54e15-fda6-41c5-ae68-62d3de25dd71.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "8",
-//       "description": "A Pokémon adventure story.",
-//       "status": "1",
-//       "category": "month",
-//     },
-//   ];
+//   List<Map<String, dynamic>> allManga = await getAllComics();
 
-//   // Lọc theo rankingType (week hoặc month)
-//   List<Map<String, dynamic>> filteredData =
-//       data.where((manga) => manga["category"] == rankingType).toList();
-
-//   // Giới hạn số lượng theo limit
-//   List<Map<String, String>> result =
-//       filteredData
-//           .take(limit)
-//           .map(
-//             (manga) =>
-//                 manga.map((key, value) => MapEntry(key, value.toString())),
-//           )
-//           .toList();
-
-//   return result;
+//   // Nếu ranking type là tuần hoặc tháng, lọc theo thời gian tương ứng
+//   if (rankingType == 'week') {
+//     return getTopComicOfWeek(limit: limit);
+//   } else if (rankingType == 'month') {
+//     return getTopComicOfMonth(limit: limit);
+//   } else {
+//     // Mặc định (all) - Lấy theo lượt xem cao nhất
+//     return allManga
+//       ..sort((a, b) => b["view"].compareTo(a["view"]))
+//       ..take(limit).toList();
+//   }
 // }

@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/components/loader.dart';
+import 'package:rookiescomic_mobile/models/comics.dart' as comics_model;
 import 'package:rookiescomic_mobile/widgets/top_comics_slider.dart';
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class TopComicList extends StatelessWidget {
   const TopComicList({super.key});
+
+  Future<List<Map<String, dynamic>>> fetchFeatureComic({
+    required String rankingType,
+    required int limit,
+  }) async {
+    return comics_model.getFeatureComic(rankingType: rankingType, limit: limit);
+  }
 
   @override
   Widget build(BuildContext context) {

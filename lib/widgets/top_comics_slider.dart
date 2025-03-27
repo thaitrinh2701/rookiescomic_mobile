@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:rookiescomic_mobile/models/comics.dart'; // Add this import
 import 'dart:ui';
 
 class TopComicImageSlider extends StatefulWidget {
@@ -63,7 +64,12 @@ class _TopComicImageSliderState extends State<TopComicImageSlider> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ComicDetailPage(comic: comic),
+                          builder:
+                              (context) => ComicDetailPage(
+                                comic: Comic.fromJson(
+                                  comic,
+                                ), // Convert Map to Comic
+                              ),
                         ),
                       );
                     },

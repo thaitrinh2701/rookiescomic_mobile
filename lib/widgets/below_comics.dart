@@ -3,9 +3,9 @@ import 'package:rookiescomic_mobile/components/loader.dart';
 import 'package:rookiescomic_mobile/widgets/below_comics_slider.dart';
 
 class ComicList extends StatelessWidget {
-  final Future<List<Map<String, String>>> Function() fetchComic;
+  final Future<List<Map<String, dynamic>>> Function() fetchComic;
   final String title;
-  final Function(Map<String, String>) onTapComic;
+  final Function(Map<String, dynamic>) onTapComic;
 
   const ComicList({
     super.key,
@@ -16,7 +16,7 @@ class ComicList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, String>>>(
+    return FutureBuilder<List<Map<String, dynamic>>>(
       future: fetchComic(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

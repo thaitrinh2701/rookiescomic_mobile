@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:rookiescomic_mobile/models/comics.dart' as comics_model;
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:rookiescomic_mobile/screens/search_screen.dart';
 import 'package:rookiescomic_mobile/widgets/below_comics.dart';
@@ -13,25 +15,33 @@ class ComicScreen extends StatefulWidget {
 }
 
 class _ComicsScreenState extends State<ComicScreen> {
-  void _navigateToDetail(Map<String, String> comics) {
+  // Methods to fetch comics
+  Future<List<Map<String, dynamic>>> fetchTopComicOfWeek({
+    required int limit,
+  }) async {
+    // Call the imported function
+    return comics_model.getTopComicOfWeek(limit: limit);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchTopComicOfMonth({
+    required int limit,
+  }) async {
+    // Call the imported function
+    return comics_model.getTopComicOfMonth(limit: limit);
+  }
+
+  void _navigateToDetail(dynamic comic) {
     if (!mounted) return;
-    if (comics.isEmpty) {
-      print("Error: Comic data is empty!");
-      return;
-    }
 
     Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ComicDetailPage(comic: comics),
-          ),
-        )
-        .then((_) {
-          print("Returned from detail page");
-        })
-        .catchError((e) {
-          print("Navigation error: $e");
-        });
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ComicDetailPage(
+              comic: comics_model.Comic.fromJson(comic as Map<String, dynamic>),
+            ),
+      ),
+    );
   }
 
   @override
@@ -72,6 +82,7 @@ class _ComicsScreenState extends State<ComicScreen> {
                       .map((comic) => comic.toStringMap())
                       .toList();
                 },
+
                 title: " Truyện hot tuần 🔥",
                 onTapComic: _navigateToDetail,
               ),
@@ -89,6 +100,7 @@ class _ComicsScreenState extends State<ComicScreen> {
                       .map((comic) => comic.toStringMap())
                       .toList();
                 },
+
                 title: " Truyện hot tháng 🔥",
                 onTapComic: _navigateToDetail,
               ),

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart'; // Add this import
-import 'package:rookiescomic_mobile/models/comics.dart';
+
+import 'package:rookiescomic_mobile/models/comics.dart'; // This import should include formatDate
+import 'package:rookiescomic_mobile/models/chapter.dart';
+import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
+import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
 
 class ComicDetailPage extends StatefulWidget {
-  final Map<String, dynamic> comic;
+  final Comic comic; // Change to Comic type
 
   const ComicDetailPage({super.key, required this.comic});
 
@@ -25,7 +28,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
   void initState() {
     super.initState();
     final int quantityChap =
-        int.tryParse(widget.comic['quantity_chap']?.toString() ?? '0') ?? 0;
+        int.tryParse(widget.comic.quantityChap.toString() ?? '0') ?? 0;
     totalPages = (quantityChap / chaptersPerPage).ceil();
     pageController.text = currentPage.toString();
   }
@@ -48,7 +51,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
   @override
   Widget build(BuildContext context) {
     final int quantityChap =
-        int.tryParse(widget.comic['quantity_chap']?.toString() ?? '0') ?? 0;
+        int.tryParse(widget.comic.quantityChap.toString() ?? '0') ?? 0;
 
     return Scaffold(
       body: CustomScrollView(
@@ -63,7 +66,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                 children: [
                   Positioned.fill(
                     child: CachedNetworkImage(
-                      imageUrl: widget.comic['cover_url'] ?? '',
+                      imageUrl: widget.comic.coverUrl ?? '',
                       fit: BoxFit.cover,
                       errorWidget:
                           (context, url, error) =>
@@ -116,7 +119,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: CachedNetworkImage(
-                                  imageUrl: widget.comic['cover_url'] ?? '',
+                                  imageUrl: widget.comic.coverUrl ?? '',
                                   width: 100,
                                   height: 140,
                                   fit: BoxFit.cover,
@@ -128,8 +131,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.comic['comic_name'] ??
-                                          'Không có tên',
+                                      widget.comic.comicName ?? 'Không có tên',
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -146,7 +148,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Lượt xem: ${widget.comic['view'] ?? 0}",
+                                      "Lượt xem: ${widget.comic.view ?? 0}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
@@ -154,7 +156,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Ngày đăng: ${formatDate(widget.comic['created_date'])}",
+                                      "Ngày đăng: ${formatDate(widget.comic.createdDate)}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
@@ -234,7 +236,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                       const SizedBox(height: 8),
                       AnimatedCrossFade(
                         firstChild: Text(
-                          widget.comic['description'] ?? 'Không có mô tả',
+                          widget.comic.description ?? 'Không có mô tả',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[800],
@@ -244,7 +246,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         secondChild: Text(
-                          widget.comic['description'] ?? 'Không có mô tả',
+                          widget.comic.description ?? 'Không có mô tả',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[800],
@@ -258,7 +260,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                         duration: const Duration(milliseconds: 300),
                       ),
 
-                      if ((widget.comic['description'] ?? '').length > 100)
+                      if ((widget.comic.description ?? '').length > 100)
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -345,7 +347,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
               ),
             ),
           ),
-          // Modified SliverList to account for sorting order
+          // Modified SliverList for better lock visualization
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               // Determine chapter number based on sorting order
@@ -363,25 +365,169 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
               // Check if chapNumber is valid
               if (chapNumber <= 0 || chapNumber > quantityChap) return null;
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: const Color(0xFF4D4FC1),
-                  child: Text(
-                    "$chapNumber",
-                    style: const TextStyle(color: Colors.white),
+              // Get chapter data if available
+              Chapter? chapter;
+              bool isLocked = false;
+              bool isPaid = false;
+              double price = 0.0;
+
+              if (widget.comic.chapters != null &&
+                  chapNumber <= widget.comic.chapters!.length) {
+                chapter = widget.comic.chapters![chapNumber - 1];
+                isLocked = chapter.isLocked;
+                isPaid = chapter.chapterType == 'pay';
+                price = chapter.price;
+              }
+
+              return Container(
+                margin: const EdgeInsets.symmetric(
+                  vertical: 4.0,
+                  horizontal: 16.0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                  border:
+                      isPaid && isLocked
+                          ? Border.all(
+                            color: Colors.orange,
+                            width: 2.0,
+                          ) // Make border more visible
+                          : null,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
                   ),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        isPaid && isLocked
+                            ? Colors.orange
+                            : const Color(0xFF4D4FC1),
+                    child:
+                        isPaid && isLocked
+                            ? const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 20,
+                            )
+                            : Text(
+                              "$chapNumber",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                  ),
+                  title: Row(
+                    children: [
+                      Text(
+                        "Chương $chapNumber",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color:
+                              isPaid && isLocked
+                                  ? Colors.orange.shade800
+                                  : Colors.black,
+                        ),
+                      ),
+                      if (isPaid && isLocked)
+                        Container(
+                          margin: const EdgeInsets.only(left: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.lock, size: 12, color: Colors.white),
+                              SizedBox(width: 4),
+                              Text(
+                                "KHÓA",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      if (isPaid && isLocked)
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.monetization_on,
+                                size: 16,
+                                color: Colors.orange,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${price.toInt()} xu",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  trailing:
+                      isPaid && isLocked
+                          ? ElevatedButton.icon(
+                            icon: const Icon(Icons.shopping_cart, size: 16),
+                            label: const Text("Mua"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => CartScreen(
+                                        args: {
+                                          'comic': widget.comic,
+                                          'chapter': chapter,
+                                        },
+                                      ),
+                                ),
+                              );
+                            },
+                          )
+                          : const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    // Convert to zero-based index for the chapter array
+                    int chapterIndex = chapNumber - 1;
+                    _navigateToReadingScreen(chapterIndex);
+                  },
                 ),
-                title: Text("Chương $chapNumber"),
-                subtitle: Text(
-                  "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  // Convert to zero-based index for the chapter array
-                  int chapterIndex = chapNumber - 1;
-                  _navigateToReadingScreen(chapterIndex);
-                },
               );
             }, childCount: chaptersPerPage),
           ),
@@ -453,46 +599,15 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
     );
   }
 
-  // Helper method to navigate to reading screen
+  // Update _navigateToReadingScreen to use Comic model
   void _navigateToReadingScreen(int chapterIndex) {
-    // Check if the comic data includes chapters
-    if (widget.comic['chapters'] == null) {
-      // If no chapters data in comic, try to find a mock chapter or show error
-      final comicWithChapters = {
-        ...widget.comic,
-        'chapters': [
-          {
-            'chapter_id': '1',
-            'chapter_name': 'Chương ${chapterIndex + 1}',
-            'created_date': DateTime.now().subtract(
-              Duration(days: chapterIndex + 1),
-            ),
-            'view': widget.comic['view'] ?? 0,
-            'chapter_content': List.generate(
-              5,
-              (index) => {
-                'content_id': '$index',
-                'content_url':
-                    'https://via.placeholder.com/800x1200/4D4FC1/FFFFFF?text=Page+${index + 1}',
-              },
-            ),
-          },
-        ],
-      };
+    try {
+      // Validate chapter index
+      if (widget.comic.chapters == null ||
+          chapterIndex >= widget.comic.chapters!.length) {
+        throw Exception("Invalid chapter index or no chapters available");
+      }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) => ReadingComicScreen(
-                comic: comicWithChapters,
-                initialChapterIndex: 0,
-                initialPageIndex: 0,
-              ),
-        ),
-      );
-    } else {
-      // Navigate with the existing chapters data
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -503,6 +618,11 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                 initialPageIndex: 0,
               ),
         ),
+      );
+    } catch (e) {
+      print("Error navigating to reading screen: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể mở truyện. Vui lòng thử lại sau.')),
       );
     }
   }
