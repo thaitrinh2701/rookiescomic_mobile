@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:rookiescomic_mobile/models/comics.dart'; // Add this import
 import 'comic_detail_page.dart';
 
 class AllComicsListPage extends StatefulWidget {
   final String title;
-  final List<Map<String, String>> comics;
+  final List<Map<String, dynamic>> comics; // Changed from Map<String, String>
 
   const AllComicsListPage({
     super.key,
@@ -288,25 +289,35 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
     }
   }
 
-  String formatDate(String? dateStr) {
-    if (dateStr == null) return 'Unknown date';
+  // Fix the formatDate method to handle both String and DateTime inputs
+  String formatDate(dynamic dateInput) {
+    if (dateInput == null) return 'Unknown date';
+
     try {
-      final date = DateTime.parse(dateStr);
+      DateTime date;
+      if (dateInput is String) {
+        date = DateTime.parse(dateInput);
+      } else if (dateInput is DateTime) {
+        date = dateInput;
+      } else {
+        return 'Invalid date';
+      }
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
       return 'Invalid date';
     }
   }
 
-  Widget _buildComicCard(Map<String, String> comic) {
-    final String imageUrl = comic["cover_url"] ?? "";
-    final String title = comic["comic_name"] ?? "Không có tên";
-    final String description = comic["description"] ?? "Hiện không có mô tả";
-    final String chapCount = comic["quantity_chap"] ?? "0";
-    final String views = comic["view"] ?? "0";
-    final String genre = comic["genres_id"] ?? "unknown";
+  Widget _buildComicCard(Map<String, dynamic> comic) {
+    final String imageUrl = comic["cover_url"]?.toString() ?? "";
+    final String title = comic["comic_name"]?.toString() ?? "Không có tên";
+    final String description =
+        comic["description"]?.toString() ?? "Hiện không có mô tả";
+    final String chapCount = comic["quantity_chap"]?.toString() ?? "0";
+    final String views = comic["view"]?.toString() ?? "0";
+    final String genre = comic["genres_id"]?.toString() ?? "unknown";
 
-    // Map tới Genres ID để có gì lấy cho dễ
+    // Map genre IDs to display names
     final Map<String, Map<String, dynamic>> genreMap = {
       "action": {"name": "Hành động", "color": const Color(0xFFE53935)},
       "comedy": {"name": "Hài hước", "color": const Color(0xFFFFB300)},
@@ -323,7 +334,10 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ComicDetailPage(comic: comic),
+            builder:
+                (context) => ComicDetailPage(
+                  comic: Comic.fromJson(comic), // Convert Map to Comic
+                ),
           ),
         );
       },
@@ -343,6 +357,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Comic cover with gradient overlay
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(16),
@@ -379,7 +394,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                           ),
                     ),
                   ),
-                  // GGENRES
+                  // Genre tag at top
                   Positioned(
                     top: 8,
                     left: 0,
@@ -404,7 +419,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                       ),
                     ),
                   ),
-                  // STAT Ở BOTTOM - VIEW
+                  // Stats at bottom
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -444,8 +459,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                 ],
               ),
             ),
-
-            // Thông tin truyện
+            // Comic info
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -463,8 +477,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-
-                    // Phần Description
+                    // Description
                     Expanded(
                       child: Text(
                         description,
@@ -477,11 +490,10 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
-                    // Phần danh sách chương
+                    // Stats row at bottom
                     Row(
                       children: [
-                        // Đếm chapter
+                        // Chapters count
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -507,8 +519,7 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-
-                        // DAte
+                        // Date
                         Text(
                           formatDate(comic["created_date"]),
                           style: TextStyle(
@@ -516,10 +527,8 @@ class _AllComicsListPageState extends State<AllComicsListPage> {
                             color: Colors.grey.shade600,
                           ),
                         ),
-
                         const Spacer(),
-
-                        // Nút "Đọc truyện"
+                        // Read now button
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,

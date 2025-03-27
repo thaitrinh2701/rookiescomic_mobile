@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:rookiescomic_mobile/pages/view_all_comics_page.dart';
 
-class ComicSlider extends StatefulWidget {
-  final List<Map<String, String>> comics;
+class ComicSlider extends StatelessWidget {
+  final List<Map<String, dynamic>> comics;
   final String title;
-  final Function(Map<String, String>) onTapComic;
+  final Function(Map<String, dynamic>) onTapComic;
 
   const ComicSlider({
     super.key,
@@ -13,13 +13,6 @@ class ComicSlider extends StatefulWidget {
     required this.title,
     required this.onTapComic,
   });
-
-  @override
-  State<ComicSlider> createState() => _ComicSliderState();
-}
-
-class _ComicSliderState extends State<ComicSlider> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +27,7 @@ class _ComicSliderState extends State<ComicSlider> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.title,
+                title,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -48,10 +41,8 @@ class _ComicSliderState extends State<ComicSlider> {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => AllComicsListPage(
-                            title: widget.title,
-                            comics: widget.comics,
-                          ),
+                          (context) =>
+                              AllComicsListPage(title: title, comics: comics),
                     ),
                   );
                 },
@@ -73,22 +64,22 @@ class _ComicSliderState extends State<ComicSlider> {
         SizedBox(
           height: 230, // Tăng chiều cao để tránh overflow
           child: CarouselSlider.builder(
-            itemCount: widget.comics.length,
+            itemCount: comics.length,
             options: CarouselOptions(
               height: 210, // Đảm bảo đủ không gian cho ảnh và text
               autoPlay: true,
               enlargeCenterPage: false,
               viewportFraction: 0.45, // Tăng kích thước hình ảnh
               onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index;
-                });
+                // setState(() {
+                //   _currentIndex = index;
+                // });
               },
             ),
             itemBuilder: (context, index, realIndex) {
-              final comic = widget.comics[index];
+              final comic = comics[index];
               return GestureDetector(
-                onTap: () => widget.onTapComic(comic),
+                onTap: () => onTapComic(comic),
                 child: Column(
                   mainAxisSize: MainAxisSize.min, // Ngăn Column mở rộng vô hạn
                   children: [

@@ -1,3 +1,5 @@
+import 'chapter.dart';
+
 class Comic {
   final String comicId;
   final String comicName;
@@ -9,6 +11,7 @@ class Comic {
   final int status;
   final int view;
   final String genresId;
+  List<Chapter>? chapters;
 
   Comic({
     required this.comicId,
@@ -21,21 +24,48 @@ class Comic {
     required this.status,
     required this.view,
     required this.genresId,
+    this.chapters,
   });
 
   // Convert JSON sang object
   factory Comic.fromJson(Map<String, dynamic> json) {
+    // Handle missing user_id
+    String userId = '';
+    if (json["user_id"] != null) {
+      userId = json["user_id"].toString();
+    }
+
+    // Handle created_date
+    DateTime createdDate;
+    try {
+      if (json["created_date"] is DateTime) {
+        createdDate = json["created_date"];
+      } else if (json["created_date"] != null) {
+        createdDate = DateTime.parse(json["created_date"].toString());
+      } else {
+        createdDate = DateTime.now();
+      }
+    } catch (e) {
+      createdDate = DateTime.now();
+    }
+
     return Comic(
-      comicId: json["comic_id"],
-      comicName: json["comic_name"],
-      coverUrl: json["cover_url"],
-      userId: json["user_id"],
-      createdDate: DateTime.parse(json["created_date"]),
-      quantityChap: int.parse(json["quantity_chap"].toString()),
-      description: json["description"],
-      status: int.parse(json["status"].toString()),
-      view: int.parse(json["view"].toString()),
-      genresId: json["genres_id"],
+      comicId: json["comic_id"]?.toString() ?? '',
+      comicName: json["comic_name"]?.toString() ?? '',
+      coverUrl: json["cover_url"]?.toString() ?? '',
+      userId: userId,
+      createdDate: createdDate,
+      quantityChap: int.tryParse(json["quantity_chap"]?.toString() ?? '0') ?? 0,
+      description: json["description"]?.toString() ?? '',
+      status: int.tryParse(json["status"]?.toString() ?? '0') ?? 0,
+      view: int.tryParse(json["view"]?.toString() ?? '0') ?? 0,
+      genresId: json["genres_id"]?.toString() ?? '',
+      chapters:
+          json["chapters"] != null
+              ? (json["chapters"] as List)
+                  .map((c) => Chapter.fromJson(c))
+                  .toList()
+              : null,
     );
   }
 
@@ -52,6 +82,7 @@ class Comic {
       "status": status,
       "view": view,
       "genres_id": genresId,
+      "chapters": chapters?.map((c) => c.toJson()).toList(),
     };
   }
 }
@@ -75,6 +106,176 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 7000,
       "genres_id": "action",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "2",
@@ -85,12 +286,182 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "created_date": DateTime.now().subtract(
         Duration(days: 5),
       ), // 5 ngày trước
-      "quantity_chap": 25,
+      "quantity_chap": 8,
       "description":
           "Một bộ truyện hài hành động về một gia đình giả bao gồm một điệp viên, một sát thủ và một nhà ngoại cảm! Điệp viên hàng đầu Twilight là bậc thầy trong việc trà trộn vào các nhiệm vụ nguy hiểm. Nhưng khi anh nhận được nhiệm vụ bất khả thi nhất—kết hôn và có con—có lẽ lần này anh đã gặp phải thử thách quá sức mình!",
       "status": 1,
       "view": 5000,
       "genres_id": "comedy",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "3",
@@ -107,6 +478,176 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 6500,
       "genres_id": "mystery",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "4",
@@ -123,10 +664,180 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 7200,
       "genres_id": "action",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://hinhhinh.com/12998/fix-1/0.jpg?gt=hdfgdfg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "5",
-      "comic_name": "Houkago Bokura wa Uchuu ni Madou",
+      "comic_name": "LOCKED COMIC - Truyện Khóa (1)",
       "cover_url":
           "https://mangadex.org/covers/91a2e0c9-cd81-4bf7-b5f7-bb37434bf6b3/7a41b522-5383-422b-b6b4-fc2007f5c603.jpg",
       "user_id": "admin",
@@ -139,10 +850,117 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 4800,
       "genres_id": "sci-fi",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1 (FREE)",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 10)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2 (LOCKED)",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "pay",
+          "price": 75,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "pay",
+          "price": 100,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "pay",
+          "price": 150,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 2)),
+          "view": 500,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "6",
-      "comic_name": "Pocket Monsters: Liko's Treasure",
+      "comic_name": "Unlocked Comic 1",
       "cover_url":
           "https://mangadex.org/covers/39c2752b-0d08-4bdc-8f99-4ac273fd194a/10f54e15-fda6-41c5-ae68-62d3de25dd71.jpg",
       "user_id": "admin",
@@ -155,10 +973,180 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 5300,
       "genres_id": "adventure",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "7",
-      "comic_name": "Attack on Titan",
+      "comic_name": "LOCKED COMIC - Truyện Khóa (2)",
       "cover_url":
           "https://mangadex.org/covers/304ceac3-8cdb-4fe7-acf7-2b6ff7a60613/29f82b1d-b37f-455a-b630-e42bccb1422a.jpg",
       "user_id": "admin",
@@ -171,6 +1159,113 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 20000,
       "genres_id": "action",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1 (FREE)",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 12)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2 (LOCKED)",
+          "chapter_type": "pay",
+          "price": 100,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 10)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "pay",
+          "price": 100,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "pay",
+          "price": 150,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "pay",
+          "price": 150,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "8",
@@ -185,6 +1280,176 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 50000,
       "genres_id": "adventure",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
     {
       "comic_id": "9",
@@ -199,155 +1464,206 @@ Future<List<Map<String, dynamic>>> getAllComics() async {
       "status": 1,
       "view": 15000,
       "genres_id": "romance",
+      "chapters": [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "2",
+          "chapter_name": "Chapter 2",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now(),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "3",
+          "chapter_name": "Chapter 3",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 8)),
+          "view": 900,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "4",
+          "chapter_name": "Chapter 4",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 7)),
+          "view": 850,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "5",
+          "chapter_name": "Chapter 5",
+          "chapter_type": "free",
+          "price": 0,
+          "is_locked": false,
+          "created_date": DateTime.now().subtract(Duration(days: 6)),
+          "view": 800,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "6",
+          "chapter_name": "Chapter 6",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 5)),
+          "view": 700,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "7",
+          "chapter_name": "Chapter 7",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 4)),
+          "view": 650,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+        {
+          "chapter_id": "8",
+          "chapter_name": "Chapter 8",
+          "chapter_type": "pay",
+          "price": 50,
+          "is_locked": true,
+          "created_date": DateTime.now().subtract(Duration(days: 3)),
+          "view": 600,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ],
     },
-    {
-      "comic_id": "10",
-      "comic_name": "Blue Lock",
-      "cover_url":
-          "https://mangadex.org/covers/4141c5dc-c525-4df5-afd7-cc7d192a832f/92943ee9-92c3-43f9-96e2-d73515ace108.jpg",
-      "user_id": "admin",
-      "created_date": DateTime.now().subtract(Duration(days: 3)),
-      "quantity_chap": 30,
-      "description":
-          "Một cuộc thi khốc liệt để tìm ra tiền đạo xuất sắc nhất Nhật Bản, quyết định tương lai của bóng đá nước này.",
-      "status": 1,
-      "view": 18000,
-      "genres_id": "sports",
-    },
-  ];
+  ].map((comic) {
+    if (!comic.containsKey('chapters')) {
+      // Add default chapters for comics that don't have them
+      comic['chapters'] = [
+        {
+          "chapter_id": "1",
+          "chapter_name": "Chapter 1",
+          "created_date": DateTime.now().subtract(Duration(days: 1)),
+          "view": 1000,
+          "chapter_content": [
+            {
+              "content_id": "1",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+            {
+              "content_id": "2",
+              "content_url":
+                  "https://cuutruyen.net/img/oneshot-dayruined.5d6664b8.jpg",
+            },
+          ],
+        },
+      ];
+    }
+    return comic;
+  }).toList();
 }
 
-// **Lấy top truyện theo tuần (7 ngày)**
-Future<List<Map<String, String>>> getTopComicOfWeek({
-  required int limit,
-}) async {
-  List<Map<String, dynamic>> allManga = await getAllComics();
-  DateTime now = DateTime.now();
-  DateTime oneWeekAgo = now.subtract(Duration(days: 7));
-
-  List<Map<String, dynamic>> filteredManga =
-      allManga
-          .where((manga) => manga["created_date"].isAfter(oneWeekAgo))
-          .toList()
-        ..sort((a, b) => b["view"].compareTo(a["view"]));
-
-  return filteredManga
-      .take(limit)
-      .map(
-        (manga) => manga.map((key, value) => MapEntry(key, value.toString())),
-      )
-      .toList();
-}
-
-// **Lấy top truyện theo tháng (30 ngày)**
-Future<List<Map<String, String>>> getTopComicOfMonth({
-  required int limit,
-}) async {
-  List<Map<String, dynamic>> allManga = await getAllComics();
-  DateTime now = DateTime.now();
-  DateTime oneMonthAgo = now.subtract(Duration(days: 30));
-
-  List<Map<String, dynamic>> filteredManga =
-      allManga
-          .where((manga) => manga["created_date"].isAfter(oneMonthAgo))
-          .toList()
-        ..sort((a, b) => b["view"].compareTo(a["view"]));
-
-  return filteredManga
-      .take(limit)
-      .map(
-        (manga) => manga.map((key, value) => MapEntry(key, value.toString())),
-      )
-      .toList();
-}
-
-// **Lấy truyện theo thể loại**
-Future<List<Map<String, String>>> getMangaByGenre({
-  required String genre,
-  required int limit,
-}) async {
-  List<Map<String, dynamic>> allManga = await getAllComics();
-
-  List<Map<String, dynamic>> filteredManga =
-      allManga
-          .where(
-            (manga) => manga["genres_id"].toLowerCase() == genre.toLowerCase(),
-          )
-          .toList()
-        ..sort((a, b) => b["view"].compareTo(a["view"]));
-
-  return filteredManga
-      .take(limit)
-      .map(
-        (manga) => manga.map((key, value) => MapEntry(key, value.toString())),
-      )
-      .toList();
-}
-
-Future<List<Map<String, dynamic>>> getFeatureComic({
-  required String rankingType,
-  required int limit,
-}) async {
-  await Future.delayed(Duration(seconds: 1)); // Giả lập thời gian tải dữ liệu
-
-  List<Map<String, dynamic>> data = [
-    {
-      "comic_id": "1",
-      "comic_name": "Touhou Chireikiden: Hansoku Tantei Satori",
-      "cover_url":
-          "https://mangadex.org/covers/f4fa3679-6918-4684-bcb6-377c9f336898/31d5e78e-a8f2-44fd-b1b0-94828a4f7fd4.jpg",
-      "user_id": "admin",
-      "created_date": DateTime(2025, 3, 10),
-      "quantity_chap": 15,
-      "description": "A manga from the Touhou Project universe.",
-      "status": 1,
-      "view": 6500,
-      "genres_id": "mystery",
-    },
-    {
-      "comic_id": "2",
-      "comic_name": "Lycoris Recoil",
-      "cover_url":
-          "https://mangadex.org/covers/9c21fbcd-e22e-4e6d-8258-7d580df9fc45/0184636a-f44c-4073-9b55-435120755e47.jpg",
-      "user_id": "admin",
-      "created_date": DateTime(2025, 3, 10),
-      "quantity_chap": 20,
-      "description": "An action-packed story about secret agents.",
-      "status": 1,
-      "view": 7200,
-      "genres_id": "action",
-    },
-    {
-      "comic_id": "3",
-      "comic_name": "Houkago Bokura wa Uchuu ni Madou",
-      "cover_url":
-          "https://mangadex.org/covers/91a2e0c9-cd81-4bf7-b5f7-bb37434bf6b3/7a41b522-5383-422b-b6b4-fc2007f5c603.jpg",
-      "user_id": "admin",
-      "created_date": DateTime(2025, 3, 10),
-      "quantity_chap": 10,
-      "description": "A sci-fi romance manga.",
-      "status": 1,
-      "view": 4800,
-      "genres_id": "sci-fi",
-    },
-    {
-      "comic_id": "4",
-      "comic_name": "Pocket Monsters: Liko's Treasure",
-      "cover_url":
-          "https://mangadex.org/covers/39c2752b-0d08-4bdc-8f99-4ac273fd194a/10f54e15-fda6-41c5-ae68-62d3de25dd71.jpg",
-      "user_id": "admin",
-      "created_date": DateTime(2025, 3, 10),
-      "quantity_chap": 8,
-      "description": "A Pokémon adventure story.",
-      "status": 1,
-      "view": 5300,
-      "genres_id": "adventure",
-    },
-  ];
-
-  return data.take(limit).toList();
-}
-
+// Make formatDate function available for other files to import
 String formatDate(dynamic dateInput) {
   if (dateInput == null) return "Không xác định"; // Kiểm tra null
 
@@ -371,76 +1687,54 @@ String formatDate(dynamic dateInput) {
   return formattedDate;
 }
 
-// Future<List<Map<String, String>>> getFeatureManga({
-//   required String rankingType,
-//   required int limit,
-// }) async {
-//   await Future.delayed(Duration(seconds: 1)); // Giả lập thời gian tải dữ liệu
+// **Lấy top truyện theo tuần (7 ngày)**
+Future<List<Map<String, dynamic>>> getTopComicOfWeek({
+  required int limit,
+}) async {
+  List<Map<String, dynamic>> allManga = await getAllComics();
+  DateTime now = DateTime.now();
+  DateTime oneWeekAgo = now.subtract(Duration(days: 7));
 
-//   List<Map<String, dynamic>> data = [
-//     {
-//       "comic_id": "1",
-//       "comic_name": "Touhou Chireikiden: Hansoku Tantei Satori",
-//       "cover_url":
-//           "https://mangadex.org/covers/f4fa3679-6918-4684-bcb6-377c9f336898/31d5e78e-a8f2-44fd-b1b0-94828a4f7fd4.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "15",
-//       "description": "A manga from the Touhou Project universe.",
-//       "status": "1",
-//       "category": "week",
-//     },
-//     {
-//       "comic_id": "2",
-//       "comic_name": "Lycoris Recoil",
-//       "cover_url":
-//           "https://mangadex.org/covers/9c21fbcd-e22e-4e6d-8258-7d580df9fc45/0184636a-f44c-4073-9b55-435120755e47.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "20",
-//       "description": "An action-packed story about secret agents.",
-//       "status": "1",
-//       "category": "week",
-//     },
-//     {
-//       "comic_id": "3",
-//       "comic_name": "Houkago Bokura wa Uchuu ni Madou",
-//       "cover_url":
-//           "https://mangadex.org/covers/91a2e0c9-cd81-4bf7-b5f7-bb37434bf6b3/7a41b522-5383-422b-b6b4-fc2007f5c603.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "10",
-//       "description": "A sci-fi romance manga.",
-//       "status": "1",
-//       "category": "month",
-//     },
-//     {
-//       "comic_id": "4",
-//       "comic_name": "Pocket Monsters: Liko's Treasure",
-//       "cover_url":
-//           "https://mangadex.org/covers/39c2752b-0d08-4bdc-8f99-4ac273fd194a/10f54e15-fda6-41c5-ae68-62d3de25dd71.jpg",
-//       "user_id": "admin",
-//       "created_date": "2025-03-10",
-//       "quantity_chap": "8",
-//       "description": "A Pokémon adventure story.",
-//       "status": "1",
-//       "category": "month",
-//     },
-//   ];
+  return allManga
+      .where((manga) => manga["created_date"].isAfter(oneWeekAgo))
+      .toList()
+    ..sort((a, b) => b["view"].compareTo(a["view"]))
+    ..take(limit).toList();
+}
 
-//   // Lọc theo rankingType (week hoặc month)
-//   List<Map<String, dynamic>> filteredData =
-//       data.where((manga) => manga["category"] == rankingType).toList();
+// **Lấy top truyện theo tháng (30 ngày)**
+Future<List<Map<String, dynamic>>> getTopComicOfMonth({
+  required int limit,
+}) async {
+  List<Map<String, dynamic>> allManga = await getAllComics();
+  DateTime now = DateTime.now();
+  DateTime oneMonthAgo = now.subtract(Duration(days: 30));
 
-//   // Giới hạn số lượng theo limit
-//   List<Map<String, String>> result =
-//       filteredData
-//           .take(limit)
-//           .map(
-//             (manga) =>
-//                 manga.map((key, value) => MapEntry(key, value.toString())),
-//           )
-//           .toList();
+  return allManga
+      .where((manga) => manga["created_date"].isAfter(oneMonthAgo))
+      .toList()
+    ..sort((a, b) => b["view"].compareTo(a["view"]))
+    ..take(limit).toList();
+}
 
-//   return result;
-// }
+// **Lấy truyện nổi bật**
+Future<List<Map<String, dynamic>>> getFeatureComic({
+  required String rankingType,
+  required int limit,
+}) async {
+  await Future.delayed(Duration(seconds: 1)); // Giả lập thời gian tải dữ liệu
+
+  List<Map<String, dynamic>> allManga = await getAllComics();
+
+  // Nếu ranking type là tuần hoặc tháng, lọc theo thời gian tương ứng
+  if (rankingType == 'week') {
+    return getTopComicOfWeek(limit: limit);
+  } else if (rankingType == 'month') {
+    return getTopComicOfMonth(limit: limit);
+  } else {
+    // Mặc định (all) - Lấy theo lượt xem cao nhất
+    return allManga
+      ..sort((a, b) => b["view"].compareTo(a["view"]))
+      ..take(limit).toList();
+  }
+}

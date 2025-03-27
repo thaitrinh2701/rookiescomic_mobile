@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rookiescomic_mobile/models/comics.dart';
-import 'package:rookiescomic_mobile/pages/comic_detail_page.dart'; // Add this import
+import 'package:rookiescomic_mobile/models/comics.dart'; // Make sure this import includes formatDate
+import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);
@@ -246,7 +246,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ComicDetailPage(comic: processedComic),
+            builder:
+                (context) => ComicDetailPage(
+                  comic: Comic.fromJson(processedComic), // Convert Map to Comic
+                ),
           ),
         );
       },
@@ -396,5 +399,24 @@ class _CategoryScreenState extends State<CategoryScreen> {
         ),
       ),
     );
+  }
+}
+
+// Fix the formatDate method to handle both String and DateTime inputs
+String formatDate(dynamic dateInput) {
+  if (dateInput == null) return 'Không xác định';
+
+  try {
+    DateTime date;
+    if (dateInput is String) {
+      date = DateTime.parse(dateInput);
+    } else if (dateInput is DateTime) {
+      date = dateInput;
+    } else {
+      return 'Không xác định';
+    }
+    return '${date.day}/${date.month}/${date.year}';
+  } catch (e) {
+    return 'Không xác định';
   }
 }

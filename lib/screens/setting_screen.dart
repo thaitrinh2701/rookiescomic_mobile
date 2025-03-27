@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rookiescomic_mobile/apis/google_signout.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart';
 import 'package:rookiescomic_mobile/pages/subscription_page.dart';
+import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -67,7 +68,17 @@ class _SettingScreenState extends State<SettingScreen> {
             },
           ),
           SizedBox(height: 20),
-          _buildSectionTitle("Monetization"),
+          _buildSectionTitle("Truyện trả phí"),
+          _buildListTile(
+            icon: Icons.shopping_cart,
+            title: "Giỏ hàng",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CartScreen()),
+              );
+            },
+          ),
           _buildListTile(
             icon: Icons.monetization_on,
             title: "Đăng ký gói",

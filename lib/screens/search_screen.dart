@@ -112,7 +112,11 @@ class _SearchScreenState extends State<SearchScreen> {
                               context,
                               MaterialPageRoute(
                                 builder:
-                                    (context) => ComicDetailPage(comic: comic),
+                                    (context) => ComicDetailPage(
+                                      comic: Comic.fromJson(
+                                        comic,
+                                      ), // Convert Map to Comic
+                                    ),
                               ),
                             );
                           },
