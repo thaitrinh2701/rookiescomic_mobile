@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rookiescomic_mobile/apis/google_signout.dart';
 import 'package:rookiescomic_mobile/pages/login_page.dart';
 import 'package:rookiescomic_mobile/pages/subscription_page.dart';
-import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
+import 'package:rookiescomic_mobile/screens/cart_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -30,6 +31,18 @@ class _SettingScreenState extends State<SettingScreen> {
     setState(() {
       _user = user;
     });
+  }
+
+  Future<int?> getRole() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? roleString = prefs.getString("role");
+      print("Retrieved roleString: $roleString");
+      return roleString != null ? int.tryParse(roleString) : null;
+    } catch (e) {
+      print("Error getting role: $e");
+      return null;
+    }
   }
 
   @override
@@ -118,54 +131,98 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   Widget _buildProfileTile() {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage:
-            _user?.photoURL != null ? NetworkImage(_user!.photoURL!) : null,
-        child: _user?.photoURL == null ? Icon(Icons.person) : null,
-      ),
-      title: Text(
-        _user?.displayName ?? "Khách hàng",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: _user?.displayName != null ? Color(0xFF4D4FC1) : Colors.black,
-        ),
-      ),
+    return FutureBuilder<int?>(
+      future: getRole(),
+      builder: (context, snapshot) {
+        String roleText = "Khách vãng lai"; // Mặc định nếu không có dữ liệu
 
-      subtitle:
-          _user?.email != null
-              ? Text(_user!.email!)
-              : InkWell(
-                onTap: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  ).then(
-                    (_) => _fetchUserInfo(),
-                  ); // Cập nhật thông tin sau khi quay lại
-                },
-                borderRadius: BorderRadius.circular(8), // Bo góc hiệu ứng chạm
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ), // Tăng vùng chạm
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.login, color: Color(0xFF4D4FC1), size: 20),
-                      SizedBox(width: 5),
-                      Text(
-                        "Đăng nhập",
-                        style: TextStyle(
-                          color: Color(0xFF4D4FC1),
-                          fontWeight: FontWeight.w500,
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          switch (snapshot.data) {
+            case 1:
+              roleText = "Quản trị viên";
+              break;
+            case 2:
+              roleText = "Quản lý";
+              break;
+            case 3:
+              roleText = "Người kiểm duyệt";
+              break;
+            case 4:
+              roleText = "Nhân viên";
+              break;
+            case 5:
+              roleText = "Khách hàng thường";
+              break;
+            case 6:
+              roleText = "Người đọc";
+              break;
+            case 7:
+              roleText = "Tác giả";
+              break;
+            case 8:
+              roleText = "Khách hàng VIP";
+              break;
+          }
+        }
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundImage:
+                _user?.photoURL != null ? NetworkImage(_user!.photoURL!) : null,
+            child: _user?.photoURL == null ? Icon(Icons.person) : null,
+          ),
+          title: Text(
+            _user?.displayName ?? "Khách hàng",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color:
+                  _user?.displayName != null ? Color(0xFF4D4FC1) : Colors.black,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_user?.email != null) Text(_user!.email!),
+              if (roleText != null)
+                Text(
+                  "Vai trò: $roleText",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              if (_user?.email == null)
+                InkWell(
+                  onTap: () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    ).then((_) => _fetchUserInfo());
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.login, color: Color(0xFF4D4FC1), size: 20),
+                        SizedBox(width: 5),
+                        Text(
+                          "Đăng nhập",
+                          style: TextStyle(
+                            color: Color(0xFF4D4FC1),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
