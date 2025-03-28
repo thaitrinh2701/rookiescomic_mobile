@@ -15,25 +15,25 @@ class CoinPackages extends StatefulWidget {
   });
 
   @override
-  State<CoinPackages> createState() => _CoinPackagesState();
-}
+    State<CoinPackages> createState() => _CoinPackagesState();
+  }
 
-class _CoinPackagesState extends State<CoinPackages> {
-  int? selectedPackage;
-  // Updated colors to match subscription page
-  final Color primaryColor = const Color(
-    0xFF4D4FC1,
-  ); // Changed to match login page color
-  final Color secondaryColor = const Color(
-    0xFFFF6B6B,
-  ); // Keeping the soft coral/red
-  final Color accentColor = const Color(0xFF8082FF); // Lighter shade of primary
-  final Color orangeColor = const Color(
-    0xFFFF9800,
-  ); // Orange for "Phổ biến" badge
-  final Color blueColor = const Color(0xFF42A5F5); // Blue for bonus xu badge
+  class _CoinPackagesState extends State<CoinPackages> {
+    int? selectedPackage;
+    // Updated colors to match subscription page
+    final Color primaryColor = const Color(
+      0xFF4D4FC1,
+    ); // Changed to match login page color
+    final Color secondaryColor = const Color(
+      0xFFFF6B6B,
+    ); // Keeping the soft coral/red
+    final Color accentColor = const Color(0xFF8082FF); // Lighter shade of primary
+    final Color orangeColor = const Color(
+      0xFFFF9800,
+    ); // Orange for "Phổ biến" badge
+    final Color blueColor = const Color(0xFF42A5F5); // Blue for bonus xu badge
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,14 +50,13 @@ class _CoinPackagesState extends State<CoinPackages> {
             duration: const Duration(milliseconds: 300),
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              gradient:
-                  selectedPackage == pkg["id"]
-                      ? LinearGradient(
-                        colors: [primaryColor, accentColor.withOpacity(0.8)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                      : null,
+              gradient: selectedPackage == pkg["id"]
+                  ? LinearGradient(
+                      colors: [primaryColor, accentColor.withOpacity(0.8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
               color: selectedPackage == pkg["id"] ? null : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -80,90 +79,43 @@ class _CoinPackagesState extends State<CoinPackages> {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
-                  child: Stack(
-                    clipBehavior: Clip.none, // Allow overflow for the badge
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  color:
-                                      selectedPackage == pkg["id"]
-                                          ? Colors.white.withOpacity(0.3)
-                                          : accentColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.monetization_on,
-                                  color:
-                                      selectedPackage == pkg["id"]
-                                          ? Colors.white
-                                          : accentColor,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${pkg["coins"]} xu',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          selectedPackage == pkg["id"]
-                                              ? Colors.white
-                                              : Colors.black,
-                                    ),
-                                  ),
-                                  if (pkg["bonus"] > 0)
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            selectedPackage == pkg["id"]
-                                                ? Colors.white.withOpacity(0.3)
-                                                : blueColor, // Changed to blue
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        '+${pkg["bonus"]} xu bonus',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
+                          Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: selectedPackage == pkg["id"]
+                                  ? Colors.white.withOpacity(0.3)
+                                  : accentColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.monetization_on,
+                              color: selectedPackage == pkg["id"]
+                                  ? Colors.white
+                                  : accentColor,
+                              size: 28,
+                            ),
                           ),
+                          const SizedBox(width: 12),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${pkg["price"]}đ',
+                                '${pkg["coins"]} xu',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color:
-                                      selectedPackage == pkg["id"]
-                                          ? Colors.white
-                                          : Colors.black,
+                                  color: selectedPackage == pkg["id"]
+                                      ? Colors.white
+                                      : Colors.black,
                                 ),
                               ),
-                              if (selectedPackage == pkg["id"])
+                              if (pkg["bonus"] > 0)
                                 Container(
                                   margin: const EdgeInsets.only(top: 4),
                                   padding: const EdgeInsets.symmetric(
@@ -171,57 +123,70 @@ class _CoinPackagesState extends State<CoinPackages> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: selectedPackage == pkg["id"]
+                                        ? Colors.white.withOpacity(0.3)
+                                        : blueColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        color: Colors.white,
-                                        size: 12,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Đã chọn',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    '+${pkg["bonus"]} xu bonus',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                             ],
                           ),
                         ],
                       ),
-                      // Fixed "Phổ biến" badge positioning
-                      if (pkg["popular"])
-                        Positioned(
-                          top: -15,
-                          right: -13,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: orangeColor, // Changed to orange
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Phổ biến',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${pkg["price"]}đ',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: selectedPackage == pkg["id"]
+                                  ? Colors.white
+                                  : Colors.black,
                             ),
                           ),
-                        ),
+                          if (selectedPackage == pkg["id"])
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Đã chọn',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -250,6 +215,63 @@ class _CoinPackagesState extends State<CoinPackages> {
             ],
           ),
         ),
+
+        // Nút thanh toán
+        const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: double.infinity, // Chiều rộng tối đa
+              margin: const EdgeInsets.symmetric(horizontal: 16), // Khoảng cách hai bên
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF4D4FC1), Color(0xFF8082FF)], // Gradient xanh tím
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: selectedPackage != null
+                    ? () {
+                        final selectedPkg = widget.coinPackages.firstWhere(
+                            (pkg) => pkg["id"] == selectedPackage);
+
+                        widget.onPayment(
+                          selectedPkg["price"].toString(),
+                          selectedPkg["coins"].toString(),
+                        ); // Gọi hàm thanh toán
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent, // Nền trong suốt để hiển thị gradient
+                  shadowColor: Colors.transparent, // Bỏ bóng của ElevatedButton
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  selectedPackage != null
+                      ? 'Thanh toán ${widget.coinPackages.firstWhere((pkg) => pkg["id"] == selectedPackage)["price"]}đ'
+                      : 'Chọn gói xu',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24), // Đẩy button xuống dưới
       ],
     );
   }
