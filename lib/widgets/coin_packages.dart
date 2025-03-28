@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import for number formatting
 
 class CoinPackages extends StatefulWidget {
   final Function(int) onSelected;
@@ -15,25 +16,31 @@ class CoinPackages extends StatefulWidget {
   });
 
   @override
-    State<CoinPackages> createState() => _CoinPackagesState();
+  State<CoinPackages> createState() => _CoinPackagesState();
+}
+
+class _CoinPackagesState extends State<CoinPackages> {
+  int? selectedPackage;
+  // Updated colors to match subscription page
+  final Color primaryColor = const Color(
+    0xFF4D4FC1,
+  ); // Changed to match login page color
+  final Color secondaryColor = const Color(
+    0xFFFF6B6B,
+  ); // Keeping the soft coral/red
+  final Color accentColor = const Color(0xFF8082FF); // Lighter shade of primary
+  final Color orangeColor = const Color(
+    0xFFFF9800,
+  ); // Orange for "Phổ biến" badge
+  final Color blueColor = const Color(0xFF42A5F5); // Blue for bonus xu badge
+
+  // Helper method to format price with commas
+  String _formatPrice(String price) {
+    final formatter = NumberFormat('#,###', 'vi_VN');
+    return '${formatter.format(int.parse(price))}đ';
   }
 
-  class _CoinPackagesState extends State<CoinPackages> {
-    int? selectedPackage;
-    // Updated colors to match subscription page
-    final Color primaryColor = const Color(
-      0xFF4D4FC1,
-    ); // Changed to match login page color
-    final Color secondaryColor = const Color(
-      0xFFFF6B6B,
-    ); // Keeping the soft coral/red
-    final Color accentColor = const Color(0xFF8082FF); // Lighter shade of primary
-    final Color orangeColor = const Color(
-      0xFFFF9800,
-    ); // Orange for "Phổ biến" badge
-    final Color blueColor = const Color(0xFF42A5F5); // Blue for bonus xu badge
-
-    @override
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,13 +57,14 @@ class CoinPackages extends StatefulWidget {
             duration: const Duration(milliseconds: 300),
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              gradient: selectedPackage == pkg["id"]
-                  ? LinearGradient(
-                      colors: [primaryColor, accentColor.withOpacity(0.8)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
+              gradient:
+                  selectedPackage == pkg["id"]
+                      ? LinearGradient(
+                        colors: [primaryColor, accentColor.withOpacity(0.8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                      : null,
               color: selectedPackage == pkg["id"] ? null : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -88,16 +96,18 @@ class CoinPackages extends StatefulWidget {
                             height: 50,
                             width: 50,
                             decoration: BoxDecoration(
-                              color: selectedPackage == pkg["id"]
-                                  ? Colors.white.withOpacity(0.3)
-                                  : accentColor.withOpacity(0.1),
+                              color:
+                                  selectedPackage == pkg["id"]
+                                      ? Colors.white.withOpacity(0.3)
+                                      : accentColor.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.monetization_on,
-                              color: selectedPackage == pkg["id"]
-                                  ? Colors.white
-                                  : accentColor,
+                              color:
+                                  selectedPackage == pkg["id"]
+                                      ? Colors.white
+                                      : accentColor,
                               size: 28,
                             ),
                           ),
@@ -110,9 +120,10 @@ class CoinPackages extends StatefulWidget {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: selectedPackage == pkg["id"]
-                                      ? Colors.white
-                                      : Colors.black,
+                                  color:
+                                      selectedPackage == pkg["id"]
+                                          ? Colors.white
+                                          : Colors.black,
                                 ),
                               ),
                               if (pkg["bonus"] > 0)
@@ -123,9 +134,10 @@ class CoinPackages extends StatefulWidget {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: selectedPackage == pkg["id"]
-                                        ? Colors.white.withOpacity(0.3)
-                                        : blueColor,
+                                    color:
+                                        selectedPackage == pkg["id"]
+                                            ? Colors.white.withOpacity(0.3)
+                                            : blueColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -145,13 +157,14 @@ class CoinPackages extends StatefulWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${pkg["price"]}đ',
+                            _formatPrice(pkg["price"]),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: selectedPackage == pkg["id"]
-                                  ? Colors.white
-                                  : Colors.black,
+                              color:
+                                  selectedPackage == pkg["id"]
+                                      ? Colors.white
+                                      : Colors.black,
                             ),
                           ),
                           if (selectedPackage == pkg["id"])
@@ -218,60 +231,68 @@ class CoinPackages extends StatefulWidget {
 
         // Nút thanh toán
         const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: double.infinity, // Chiều rộng tối đa
-              margin: const EdgeInsets.symmetric(horizontal: 16), // Khoảng cách hai bên
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF4D4FC1), Color(0xFF8082FF)], // Gradient xanh tím
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: double.infinity, // Chiều rộng tối đa
+            margin: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ), // Khoảng cách hai bên
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF4D4FC1),
+                  Color(0xFF8082FF),
+                ], // Gradient xanh tím
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: ElevatedButton(
-                onPressed: selectedPackage != null
-                    ? () {
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed:
+                  selectedPackage != null
+                      ? () {
                         final selectedPkg = widget.coinPackages.firstWhere(
-                            (pkg) => pkg["id"] == selectedPackage);
+                          (pkg) => pkg["id"] == selectedPackage,
+                        );
 
                         widget.onPayment(
                           selectedPkg["price"].toString(),
                           selectedPkg["coins"].toString(),
                         ); // Gọi hàm thanh toán
                       }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent, // Nền trong suốt để hiển thị gradient
-                  shadowColor: Colors.transparent, // Bỏ bóng của ElevatedButton
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.transparent, // Nền trong suốt để hiển thị gradient
+                shadowColor: Colors.transparent, // Bỏ bóng của ElevatedButton
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  selectedPackage != null
-                      ? 'Thanh toán ${widget.coinPackages.firstWhere((pkg) => pkg["id"] == selectedPackage)["price"]}đ'
-                      : 'Chọn gói xu',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+              ),
+              child: Text(
+                selectedPackage != null
+                    ? 'Thanh toán ${_formatPrice(widget.coinPackages.firstWhere((pkg) => pkg["id"] == selectedPackage)["price"])}'
+                    : 'Chọn gói xu',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 24), // Đẩy button xuống dưới
+        ),
+        const SizedBox(height: 24), // Đẩy button xuống dưới
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import formatter
 import 'package:rookiescomic_mobile/apis/subscription_balance.dart';
 import 'package:rookiescomic_mobile/apis/subscription_coin.dart';
 import 'package:rookiescomic_mobile/widgets/coin_packages.dart';
@@ -46,6 +47,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
     });
   }
 
+  // Helper method to format balance with commas
+  String formatBalance(String balance) {
+    // Extract the number part before "xu"
+    if (balance.contains("xu")) {
+      String numPart = balance.replaceAll(" xu", "").trim();
+      try {
+        int number = int.parse(numPart);
+        final formatter = NumberFormat('#,###', 'vi_VN');
+        return '${formatter.format(number)} xu';
+      } catch (e) {
+        return balance; // Return as is if parsing fails
+      }
+    }
+    return balance;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,18 +71,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         title: const Text('Nạp Xu'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Gói Xu'),
-            Tab(text: 'Gói Người Dùng'),
-          ],
+          tabs: const [Tab(text: 'Gói Xu'), Tab(text: 'Gói Người Dùng')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildCoinPurchaseTab(),
-          SubscriptionPlans(),
-        ],
+        children: [_buildCoinPurchaseTab(), SubscriptionPlans()],
       ),
     );
   }
@@ -78,8 +89,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Số dư: $balance", style: const TextStyle(fontSize: 16)),
-              Text("Xu khuyến mãi: $promotionBalance", style: const TextStyle(fontSize: 16, color: Colors.green)),
+              Text(
+                "Số dư: ${formatBalance(balance)}",
+                style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                "Xu khuyến mãi: ${formatBalance(promotionBalance)}",
+                style: const TextStyle(fontSize: 16, color: Colors.green),
+              ),
             ],
           ),
         ),

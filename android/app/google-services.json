@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "999792480834-d8gbnudh20qg85foonrmqan4c96hg01d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rookiescomic_mobile",
+            "certificate_hash": "968128dd09ee18bf2615e8aee737d51392e9e507"
+          }
+        },
+        {
           "client_id": "999792480834-i1j211jv64q7nd17jb6iuqj6otogma1i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -67,6 +75,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "999792480834-6spl77b5meatpls10ab3aig1c07k1v5r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rookiescomic.app",
+            "certificate_hash": "aa30c600c1b7dcee461de8c47fbdd4d64129dc67"
+          }
+        },
         {
           "client_id": "999792480834-d8vjkt265gv96m7lfn5p7ajj52spupgc.apps.googleusercontent.com",
           "client_type": 1,

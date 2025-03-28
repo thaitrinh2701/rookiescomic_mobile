@@ -6,6 +6,7 @@ import 'package:rookiescomic_mobile/models/chapter.dart';
 import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
 import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ComicDetailPage extends StatefulWidget {
   final Comic comic; // Change to Comic type
@@ -25,12 +26,38 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
   final TextEditingController pageController = TextEditingController();
   bool isAscendingOrder = true; // New state variable for sorting order
   int quantityChap = 0;
+  int? userRole;
+
+  Future<int?> getRole() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? roleString = prefs.getString("role");
+      print("Retrieved roleString: $roleString");
+      return roleString != null ? int.tryParse(roleString) : null;
+    } catch (e) {
+      print("Error getting role: $e");
+      return null;
+    }
+  }
+
+  Future<void> _loadUserRole() async {
+    userRole = await getRole() ?? 0; // Giá trị mặc định là 0 nếu null
+    print("🔑 Loaded user role: $userRole"); // Debug user role
+    setState(() {}); // Cập nhật lại UI
+  }
+
+  // Method to check if a chapter has been purchased
+  bool _isChapterPurchased(String chapterId) {
+    // Access the static set of purchased chapter IDs from CartScreen
+    return CartScreen.purchasedChapterIds.contains(chapterId);
+  }
 
   @override
   void initState() {
     super.initState();
     quantityChap = int.tryParse(widget.comic.quantityChap.toString()) ?? 0;
     pageController.text = currentPage.toString();
+    _loadUserRole();
 
     if (widget.comic.comicId.isEmpty) {
       print("❌ comicId is empty, skipping fetchChapters");
@@ -43,8 +70,28 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
     fetchChapters(widget.comic.comicId)
         .then((fetchedChapters) {
           setState(() {
+            // Sort chapters based on their chapter number in the name
+            fetchedChapters.sort((a, b) {
+              // Extract chapter numbers from the chapter names
+              RegExp regExp = RegExp(r'Chapter (\d+)');
+              var matchA = regExp.firstMatch(a.chapterName);
+              var matchB = regExp.firstMatch(b.chapterName);
+
+              int numA =
+                  matchA != null
+                      ? int.tryParse(matchA.group(1) ?? '0') ?? 0
+                      : 0;
+              int numB =
+                  matchB != null
+                      ? int.tryParse(matchB.group(1) ?? '0') ?? 0
+                      : 0;
+
+              return numA.compareTo(numB); // Sort in ascending order
+            });
+
             widget.comic.chapters = fetchedChapters;
             totalPages = (fetchedChapters.length / chaptersPerPage).ceil();
+            quantityChap = fetchedChapters.length;
           });
         })
         .catchError((error) {
@@ -368,34 +415,87 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
               widget.comic.chapters!.isNotEmpty)
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                // Determine chapter number based on sorting order
-                int chapNumber;
+                // Get the correct chapter index based on current page and sorting
+                int listIndex;
                 if (isAscendingOrder) {
-                  // Ascending: Start from the beginning of the current page
-                  chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
+                  // Ascending order (1, 2, 3...)
+                  listIndex = (currentPage - 1) * chaptersPerPage + index;
                 } else {
-                  // Descending: Start from the end and go backwards
-                  chapNumber =
-                      quantityChap -
+                  // Descending order (10, 9, 8...)
+                  listIndex =
+                      widget.comic.chapters!.length -
+                      1 -
                       ((currentPage - 1) * chaptersPerPage + index);
                 }
 
-                // Check if chapNumber is valid
-                if (chapNumber <= 0 || chapNumber > quantityChap) return null;
+                // Check if the index is valid
+                if (listIndex < 0 || listIndex >= widget.comic.chapters!.length)
+                  return null;
 
-                // Get chapter data if available
-                Chapter? chapter;
-                bool isLocked = false;
-                bool isPaid = false;
-                double price = 0.0;
+                // Get the chapter and extract the chapter number from name
+                Chapter chapter = widget.comic.chapters![listIndex];
 
-                if (widget.comic.chapters != null &&
-                    chapNumber <= widget.comic.chapters!.length) {
-                  chapter = widget.comic.chapters![chapNumber - 1];
-                  isLocked = chapter.isLocked;
-                  isPaid = chapter.chapterType == 'pay';
-                  price = chapter.price;
+                // Check if this chapter has been purchased
+                bool isPurchased = false;
+                if (chapter.chapterId.isNotEmpty) {
+                  // Try to access the cart screen's purchased chapters
+                  isPurchased = CartScreen.purchasedChapterIds.contains(
+                    chapter.chapterId,
+                  );
                 }
+
+                // Extract chapter number from name (e.g., "Chapter 5: Title" -> 5)
+                RegExp regExp = RegExp(r'Chapter (\d+)');
+                var match = regExp.firstMatch(chapter.chapterName);
+                String displayNumber =
+                    match != null
+                        ? match.group(1) ?? "${index + 1}"
+                        : "${index + 1}";
+
+                // Debug chapter details
+                print(
+                  "📑 Processing Chapter $displayNumber (index $listIndex):",
+                );
+
+                bool isPaid = chapter.chapterType == 'pay';
+                bool isLocked = false;
+
+                double price = chapter.price;
+                if (isPaid && (price <= 0)) {
+                  price = 999; // Default price for paid chapters
+                }
+
+                // Apply role-based locking rules
+                if (isPurchased) {
+                  // If chapter was purchased, it's unlocked regardless of role
+                  isLocked = false;
+                  print("   Chapter was purchased, unlocking it");
+                } else if (userRole == 5) {
+                  // For role 5, lock paid chapters
+                  isLocked = isPaid;
+                  print(
+                    "   Role 5 logic: isLocked = $isLocked (based on isPaid)",
+                  );
+                } else if (userRole == 7) {
+                  // For role 7, all chapters are unlocked
+                  isLocked = false;
+                  print(
+                    "   Role 7 logic: isLocked = false (all chapters unlocked)",
+                  );
+                } else if (userRole == 6 || userRole == 8) {
+                  // For roles 6 and 8, all chapters are free
+                  isLocked = false;
+                  print("   Role 6/8 logic: isLocked = false (all free)");
+                } else {
+                  // For other roles, use default locking behavior
+                  isLocked = chapter.isLocked;
+                  print(
+                    "   Default role logic: isLocked = ${chapter.isLocked}",
+                  );
+                }
+
+                print("   Final lock status: $isLocked");
+                print("   Final price: $price");
 
                 return Container(
                   margin: const EdgeInsets.symmetric(
@@ -407,10 +507,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                     borderRadius: BorderRadius.circular(12.0),
                     border:
                         isPaid && isLocked
-                            ? Border.all(
-                              color: Colors.orange,
-                              width: 2.0,
-                            ) // Make border more visible
+                            ? Border.all(color: Colors.orange, width: 2.0)
                             : null,
                     boxShadow: [
                       BoxShadow(
@@ -439,14 +536,14 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                 size: 20,
                               )
                               : Text(
-                                "$chapNumber",
+                                displayNumber,
                                 style: const TextStyle(color: Colors.white),
                               ),
                     ),
                     title: Row(
                       children: [
                         Text(
-                          "Chương $chapNumber",
+                          "Chương $displayNumber",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color:
@@ -488,7 +585,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
+                          "Cập nhật ${DateTime.now().subtract(Duration(days: listIndex)).day}/${DateTime.now().subtract(Duration(days: listIndex)).month}",
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -506,7 +603,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  "${price.toInt()} xu",
+                                  "$price xu",
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.orange,
@@ -528,6 +625,18 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: () {
+                                // Create modified chapter with correct price
+                                final chapterForCart = Chapter(
+                                  chapterId: chapter.chapterId,
+                                  chapterName: chapter.chapterName,
+                                  createdDate: chapter.createdDate,
+                                  view: chapter.view,
+                                  chapterContent: chapter.chapterContent,
+                                  chapterType: chapter.chapterType,
+                                  price: price, // Use the corrected price
+                                  isLocked: chapter.isLocked,
+                                );
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -535,7 +644,8 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                         (context) => CartScreen(
                                           args: {
                                             'comic': widget.comic,
-                                            'chapter': chapter,
+                                            'chapter':
+                                                chapterForCart, // Use the fixed chapter
                                           },
                                         ),
                                   ),
@@ -544,77 +654,34 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                             )
                             : const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Convert to zero-based index for the chapter array
-                      int chapterIndex = chapNumber - 1;
-                      _navigateToReadingScreen(chapterIndex);
+                      if (!isPaid || !isLocked) {
+                        _navigateToReadingScreen(
+                          listIndex,
+                        ); // Use the correct index in the sorted list
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Bạn cần mua chương này để đọc!"),
+                          ),
+                        );
+                      }
                     },
                   ),
                 );
               }, childCount: chaptersPerPage),
-            ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed:
-                        currentPage > 1
-                            ? () => goToPage(currentPage - 1)
-                            : null,
-                    icon: const Icon(Icons.chevron_left, size: 32),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    "Không có chương nào để hiển thị.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
-                  const SizedBox(width: 8),
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 35,
-                          child: TextField(
-                            controller: pageController,
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                              ),
-                              isDense: true,
-                            ),
-                            onSubmitted: (value) {
-                              int? page = int.tryParse(value);
-                              if (page != null) {
-                                goToPage(page);
-                              }
-                            },
-                          ),
-                        ),
-                        const Text(" / ", style: TextStyle(fontSize: 16)),
-                        Text(
-                          "$totalPages",
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed:
-                        currentPage < totalPages
-                            ? () => goToPage(currentPage + 1)
-                            : null,
-                    icon: const Icon(Icons.chevron_right, size: 32),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

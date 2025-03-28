@@ -134,8 +134,7 @@ class _SettingScreenState extends State<SettingScreen> {
     return FutureBuilder<int?>(
       future: getRole(),
       builder: (context, snapshot) {
-        String roleText = "Khách vãng lai"; // Mặc định nếu không có dữ liệu
-
+        String roleText = "Khách vãng lai";
         if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData) {
           switch (snapshot.data) {

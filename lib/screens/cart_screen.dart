@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/cart_item.dart';
 import 'package:rookiescomic_mobile/models/chapter.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
+import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
 
 class CartScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
 
   const CartScreen({super.key, this.args});
+
+  // Add a static getter that forwards to the state's static Set
+  static Set<String> get purchasedChapterIds =>
+      _CartScreenState._purchasedChapterIds;
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -16,6 +21,8 @@ class _CartScreenState extends State<CartScreen> {
   // Changed to static to persist between instances
   static final List<CartItem> _cartItems = [];
   double _totalAmount = 0;
+  static final Set<String> _purchasedChapterIds =
+      {}; // Track purchased chapters
 
   @override
   void initState() {
@@ -38,8 +45,8 @@ class _CartScreenState extends State<CartScreen> {
           price: chapter.price,
         ),
       );
+      _calculateTotal();
     }
-    _calculateTotal();
   }
 
   void _addToCart(CartItem item) {
@@ -49,7 +56,6 @@ class _CartScreenState extends State<CartScreen> {
           cartItem.comicId == item.comicId &&
           cartItem.chapterId == item.chapterId,
     );
-
     if (!exists) {
       setState(() {
         _cartItems.add(item);
@@ -65,8 +71,8 @@ class _CartScreenState extends State<CartScreen> {
             cartItem.comicId == item.comicId &&
             cartItem.chapterId == item.chapterId,
       );
+      _calculateTotal();
     });
-    _calculateTotal();
   }
 
   void _calculateTotal() {
@@ -76,7 +82,12 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _checkout() {
-    // Simulate purchase and return to previous screen with updated unlock status
+    // Add purchased chapter IDs to the tracking set
+    for (var item in _cartItems) {
+      _purchasedChapterIds.add(item.chapterId);
+    }
+
+    // Determine which screen to return to and with what data
     showDialog(
       context: context,
       builder:
@@ -88,19 +99,56 @@ class _CartScreenState extends State<CartScreen> {
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
 
-                  // Only pop back to reading screen if we came from there
-                  if (widget.args != null) {
-                    Navigator.pop(
-                      context,
-                      true,
-                    ); // Return to reading screen with success flag
-                  }
+                  // Extract chapter information for navigation
+                  Map<String, dynamic>? args = widget.args;
+                  if (args != null &&
+                      args.containsKey('comic') &&
+                      args.containsKey('chapter')) {
+                    Comic comic = args['comic'];
+                    Chapter purchasedChapter = args['chapter'];
 
-                  // Clear cart after successful purchase
-                  setState(() {
-                    _cartItems.clear();
-                    _calculateTotal();
-                  });
+                    // Find the index of the purchased chapter
+                    int chapterIndex = -1;
+                    if (comic.chapters != null) {
+                      for (int i = 0; i < comic.chapters!.length; i++) {
+                        if (comic.chapters![i].chapterId ==
+                            purchasedChapter.chapterId) {
+                          chapterIndex = i;
+                          break;
+                        }
+                      }
+                    }
+
+                    // Clear cart
+                    setState(() {
+                      _cartItems.clear();
+                      _calculateTotal();
+                    });
+
+                    Navigator.pop(context); // Return to comic detail page
+
+                    // Navigate to reading screen with the purchased chapter
+                    if (chapterIndex >= 0) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => ReadingComicScreen(
+                                comic: comic,
+                                initialChapterIndex: chapterIndex,
+                                initialPageIndex: 0,
+                              ),
+                        ),
+                      );
+                    }
+                  } else {
+                    // Just return to comic detail page
+                    setState(() {
+                      _cartItems.clear();
+                      _calculateTotal();
+                    });
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text('OK'),
               ),
@@ -224,7 +272,6 @@ class _CartScreenState extends State<CartScreen> {
                     ],
                   ),
                 ),
-
                 // Remove Button
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
