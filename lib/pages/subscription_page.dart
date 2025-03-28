@@ -5,7 +5,7 @@ import 'package:rookiescomic_mobile/widgets/coin_packages.dart';
 import 'package:rookiescomic_mobile/widgets/subscription_plans.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({Key? key}) : super(key: key);
+  const SubscriptionScreen({super.key});
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
@@ -54,18 +54,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         title: const Text('Nạp Xu'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Gói Xu'),
-            Tab(text: 'Gói Người Dùng'),
-          ],
+          tabs: const [Tab(text: 'Gói Xu'), Tab(text: 'Gói Người Dùng')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildCoinPurchaseTab(),
-          SubscriptionPlans(),
-        ],
+        children: [_buildCoinPurchaseTab(), SubscriptionPlans()],
       ),
     );
   }
@@ -79,7 +73,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Số dư: $balance", style: const TextStyle(fontSize: 16)),
-              Text("Xu khuyến mãi: $promotionBalance", style: const TextStyle(fontSize: 16, color: Colors.green)),
+              Text(
+                "Xu khuyến mãi: $promotionBalance",
+                style: const TextStyle(fontSize: 16, color: Colors.green),
+              ),
             ],
           ),
         ),

@@ -1,6 +1,5 @@
 import 'package:rookiescomic_mobile/models/users.dart';
 import 'chapter.dart';
-import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class Comic {
   final String comicId;

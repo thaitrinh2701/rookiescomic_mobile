@@ -12,36 +12,12 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, String>> allComics = [];
   List<Map<String, String>> filteredComics = [];
   bool isLoading = false;
   bool hasSearched = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchAllComics();
-  }
-
-  Future<void> _fetchAllComics() async {
-    setState(() => isLoading = true);
-    try {
-      final comics = await fetchAllComics();
-      allComics =
-          comics
-              .map(
-                (comic) => comic.toJson().map(
-                  (key, value) => MapEntry(key, value.toString()),
-                ),
-              )
-              .toList();
-    } catch (e) {
-      print("❌ Error fetching comics: $e");
-    }
-    setState(() => isLoading = false);
-  }
-
-  void _filterComics(String query) {
+  // ✅ Gọi API để tìm truyện
+  Future<void> _searchComics(String query) async {
     if (query.isEmpty) {
       setState(() {
         filteredComics = [];
@@ -51,15 +27,24 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
+      isLoading = true;
       hasSearched = true;
-      filteredComics =
-          allComics
-              .where(
-                (comic) => comic["comic_name"]!.toLowerCase().contains(
-                  query.toLowerCase(),
-                ),
-              )
-              .toList();
+    });
+
+    try {
+      final comics = await searchComicsByName(query);
+      setState(() {
+        filteredComics = comics.map((comic) => comic.toStringMap()).toList();
+      });
+    } catch (e) {
+      print("❌ Error searching comics: $e");
+      setState(() {
+        filteredComics = [];
+      });
+    }
+
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -81,7 +66,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              onChanged: _filterComics,
+              onChanged: _searchComics, // 👈 Gọi API khi nhập
             ),
           ),
           // Danh sách kết quả
@@ -121,9 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               MaterialPageRoute(
                                 builder:
                                     (context) => ComicDetailPage(
-                                      comic: Comic.fromJson(
-                                        comic,
-                                      ), // Convert Map to Comic
+                                      comic: Comic.fromJson(comic),
                                     ),
                               ),
                             );

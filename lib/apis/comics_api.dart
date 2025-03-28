@@ -73,3 +73,41 @@ Future<List<Chapter>> fetchChapters(String comicId) async {
     throw Exception('Error fetching chapters');
   }
 }
+
+Future<List<Comic>> searchComicsByName(String name) async {
+  final String apiUrl =
+      '$baseUrl/comics/search?name=${Uri.encodeComponent(name)}';
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+
+    print("🔍 Search response status: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData.map((json) => Comic.fromJson(json)).toList();
+    } else {
+      print("❌ Failed to search comics: ${response.body}");
+      throw Exception('Failed to search comics');
+    }
+  } catch (e) {
+    print('❌ Error in searchComicsByName: $e');
+    throw Exception('Error searching comics');
+  }
+}
+
+Future<List<Comic>> fetchComicsByGenresName(String genresName) async {
+  final String apiUrl = '$baseUrl/comics/genres/$genresName';
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData.map((json) => Comic.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load comics by genres name');
+    }
+  } catch (e) {
+    throw Exception('Error fetching comics by genres name: $e');
+  }
+}
