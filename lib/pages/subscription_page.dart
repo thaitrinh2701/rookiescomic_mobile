@@ -19,9 +19,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   String promotionBalance = "0 xu";
 
   final List<Map<String, dynamic>> coinPackages = [
-    {"id": 1, "coins": 100, "bonus": 10, "price": "20000", "popular": false},
-    {"id": 2, "coins": 300, "bonus": 50, "price": "50000", "popular": true},
-    {"id": 3, "coins": 500, "bonus": 100, "price": "80000", "popular": false},
+    {"id": 1, "coins": 20000, "bonus": 100, "price": "20000", "popular": false},
+    {"id": 2, "coins": 50000, "bonus": 500, "price": "50000", "popular": true},
+    {"id": 3, "coins": 80000, "bonus": 900, "price": "80000", "popular": false},
   ];
 
   // Colors for the new design - updated to match login color scheme

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/cart_item.dart';
 import 'package:rookiescomic_mobile/models/chapter.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
+import 'package:rookiescomic_mobile/apis/add_cart.dart';
 
 class CartScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
@@ -75,39 +76,51 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void _checkout() {
-    // Simulate purchase and return to previous screen with updated unlock status
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Thanh toán thành công'),
-            content: Text('Bạn đã mở khóa ${_cartItems.length} chương truyện.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
+  void _checkout() async {
+  var result = await AddCartApi.updateOrderStatus();
 
-                  // Only pop back to reading screen if we came from there
-                  if (widget.args != null) {
-                    Navigator.pop(
-                      context,
-                      true,
-                    ); // Return to reading screen with success flag
-                  }
-
-                  // Clear cart after successful purchase
-                  setState(() {
-                    _cartItems.clear();
-                    _calculateTotal();
-                  });
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-    );
+  if (result != null && result['success'] == true) {
+    print("✅ Thanh toán thành công! Mã đơn: ${result['orderId']}");
+    if (result.containsKey('walletId')) {
+      print("💰 Thanh toán từ ví: ${result['walletId']}");
+    }
+  } else {
+    print("❌ Thanh toán thất bại!");
+    return; // Dừng nếu thanh toán thất bại
   }
+
+  // Simulate purchase and return to previous screen with updated unlock status
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Thanh toán thành công'),
+      content: Text('Bạn đã mở khóa ${_cartItems.length} chương truyện.'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // Close dialog
+
+            // Only pop back to reading screen if we came from there
+            if (widget.args != null) {
+              Navigator.pop(
+                context,
+                true,
+              ); // Return to reading screen with success flag
+            }
+
+            // Clear cart after successful purchase
+            setState(() {
+              _cartItems.clear();
+              _calculateTotal();
+            });
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

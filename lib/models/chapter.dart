@@ -15,7 +15,7 @@ class Chapter {
     required this.view,
     required this.chapterContent,
     this.chapterType = 'free',
-    this.price = 0.0,
+    this.price = 999.0,
     this.isLocked = false,
   });
 

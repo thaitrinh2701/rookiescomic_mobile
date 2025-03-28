@@ -3,9 +3,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:rookiescomic_mobile/models/comics.dart'; // This import should include formatDate
 import 'package:rookiescomic_mobile/models/chapter.dart';
+import 'package:rookiescomic_mobile/models/cart_item.dart';
 import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
 import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
+import 'package:rookiescomic_mobile/apis/add_cart.dart';
+
 
 class ComicDetailPage extends StatefulWidget {
   final Comic comic; // Change to Comic type
@@ -387,7 +390,17 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                 Chapter? chapter;
                 bool isLocked = false;
                 bool isPaid = false;
-                double price = 0.0;
+                double price = 999.0;
+
+                if (widget.comic.chapters != null &&
+                    chapNumber <= widget.comic.chapters!.length) {
+                  chapter = widget.comic.chapters![chapNumber - 1];
+                  isPaid = chapter.chapterType == 'pay';
+
+                  if (chapter.price != null && chapter.price > 0) {
+                    price = chapter.price;
+                  }
+                }
 
                 if (widget.comic.chapters != null &&
                     chapNumber <= widget.comic.chapters!.length) {
@@ -527,19 +540,49 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                 backgroundColor: Colors.orange,
                                 foregroundColor: Colors.white,
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => CartScreen(
-                                          args: {
-                                            'comic': widget.comic,
-                                            'chapter': chapter,
-                                          },
-                                        ),
-                                  ),
+                              onPressed: () async {
+                                if (widget.comic == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Dữ liệu truyện không hợp lệ!")),
+                                  );
+                                  return;
+                                }
+
+                                if (chapter == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Chương không tồn tại!")),
+                                  );
+                                  return;
+                                }
+
+                                CartItem item = CartItem(
+                                  comicId: widget.comic!.comicId, 
+                                  comicName: widget.comic!.comicName,
+                                  coverUrl: widget.comic!.coverUrl, 
+                                  chapterId: chapter!.chapterId,
+                                  chapterName: chapter!.chapterName,
+                                  price: 999.0, 
                                 );
+
+                                bool success = await AddCartApi.addToCart(item);
+                                
+                                if (success) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CartScreen(
+                                        args: {
+                                          'comic': widget.comic,
+                                          'chapter': chapter,
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Thêm vào giỏ hàng thất bại!")),
+                                  );
+                                }
                               },
                             )
                             : const Icon(Icons.arrow_forward_ios, size: 16),
