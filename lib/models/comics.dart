@@ -1,5 +1,6 @@
 import 'package:rookiescomic_mobile/models/users.dart';
 import 'chapter.dart';
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class Comic {
   final String comicId;
@@ -14,6 +15,13 @@ class Comic {
   final String genresId;
   final User? user;
   List<Chapter>? chapters;
+
+  String get posterName {
+    if (user != null) {
+      return "${user!.firstName} ${user!.lastName}";
+    }
+    return "Không rõ";
+  }
 
   Comic({
     required this.comicId,
@@ -53,18 +61,27 @@ class Comic {
     }
 
     return Comic(
-      comicId: json["comicId"] ?? "",
-      comicName: json["comicName"] ?? "",
-      coverUrl: json["coverUrl"] ?? "", // SỬA LẠI đúng key camelCase
-      userId: json["userId"] ?? "",
-      user: json["user"] != null ? User.fromJson(json["user"]) : null,
+      comicId: json["comicId"] ?? json["comic_id"] ?? "",
+      comicName: json["comicName"] ?? json["comic_name"] ?? "",
+      coverUrl: json["coverUrl"] ?? json["cover_url"] ?? "",
+      userId: json["userId"] ?? json["user_id"] ?? "",
       createdDate:
-          DateTime.tryParse(json["createdDate"] ?? "") ?? DateTime.now(),
-      quantityChap: int.tryParse(json["quantityChap"]?.toString() ?? "0") ?? 0,
+          DateTime.tryParse(
+            json["createdDate"] ?? json["created_date"] ?? "",
+          ) ??
+          DateTime.now(),
+      quantityChap:
+          int.tryParse(
+            json["quantityChap"]?.toString() ??
+                json["quantity_chap"]?.toString() ??
+                "0",
+          ) ??
+          0,
       description: json["description"] ?? "",
       status: int.tryParse(json["status"]?.toString() ?? "0") ?? 0,
       view: int.tryParse(json["view"]?.toString() ?? "0") ?? 0,
-      genresId: json["genresId"] ?? "",
+      genresId: json["genresId"] ?? json["genres_id"] ?? "",
+      user: json["user"] != null ? User.fromJson(json["user"]) : null,
     );
   }
 
@@ -91,7 +108,7 @@ class Comic {
   }
 }
 
-// Future<List<Map<String, dynamic>>> getAllComics() async {
+// Future<List<Map<String, dynamic>>> fetchAllComics() async {
 //   await Future.delayed(Duration(seconds: 1)); // Giả lập tải dữ liệu
 
 //   return [
@@ -252,11 +269,11 @@ class Comic {
 //   ];
 // }
 
-// // **Lấy top truyện theo tuần (7 ngày)**
+// **Lấy top truyện theo tuần (7 ngày)**
 // Future<List<Map<String, String>>> getTopComicOfWeek({
 //   required int limit,
 // }) async {
-//   List<Map<String, dynamic>> allManga = await getAllComics();
+//   List<Map<String, dynamic>> allManga = await fetchAllComics();
 //   DateTime now = DateTime.now();
 //   DateTime oneWeekAgo = now.subtract(Duration(days: 7));
 
@@ -278,7 +295,7 @@ class Comic {
 // Future<List<Map<String, String>>> getTopComicOfMonth({
 //   required int limit,
 // }) async {
-//   List<Map<String, dynamic>> allManga = await getAllComics();
+//   List<Map<String, dynamic>> allManga = await fetchAllComics();
 //   DateTime now = DateTime.now();
 //   DateTime oneMonthAgo = now.subtract(Duration(days: 30));
 

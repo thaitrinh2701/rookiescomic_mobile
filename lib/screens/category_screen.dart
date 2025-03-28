@@ -249,7 +249,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ComicDetailPage(comic: processedComic),
+            builder:
+                (context) => ComicDetailPage(
+                  comic: Comic.fromJson(
+                    processedComic.map(
+                      (key, value) => MapEntry(key, value ?? ''),
+                    ),
+                  ),
+                ),
           ),
         );
       },

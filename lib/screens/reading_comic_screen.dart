@@ -631,7 +631,7 @@ class _ReadingComicScreenState extends State<ReadingComicScreen> {
   Widget _buildSettingsPanel() {
     // For the credits and info section
     String comicName = widget.comic.comicName ?? "Không rõ truyện";
-    String viewCount = widget.comic.view?.toString() ?? "0";
+    String viewCount = widget.comic.view.toString() ?? "0";
     String updateDate = "Không rõ";
 
     try {
@@ -639,10 +639,8 @@ class _ReadingComicScreenState extends State<ReadingComicScreen> {
           _currentChapterIndex >= 0 &&
           _currentChapterIndex < widget.comic.chapters!.length) {
         var chapter = widget.comic.chapters![_currentChapterIndex];
-        if (chapter.createdDate != null) {
-          var dateStr = chapter.createdDate.toString();
-          updateDate = dateStr.length > 10 ? dateStr.substring(0, 10) : dateStr;
-        }
+        var dateStr = chapter.createdDate.toString();
+        updateDate = dateStr.length > 10 ? dateStr.substring(0, 10) : dateStr;
       }
     } catch (e) {
       print("Error getting chapter date: $e");

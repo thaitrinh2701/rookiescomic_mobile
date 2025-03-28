@@ -6,7 +6,7 @@ import 'package:rookiescomic_mobile/models/comics.dart';
 class CartScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
 
-  const CartScreen({Key? key, this.args}) : super(key: key);
+  const CartScreen({super.key, this.args});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -14,7 +14,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   // Changed to static to persist between instances
-  static List<CartItem> _cartItems = [];
+  static final List<CartItem> _cartItems = [];
   double _totalAmount = 0;
 
   @override

@@ -4,9 +4,9 @@ class Chapter {
   final DateTime createdDate;
   final int view;
   final List<ChapterContent> chapterContent;
-  final String chapterType; // 'free' or 'pay'
-  final double price; // Price for paid chapters
-  final bool isLocked; // Locked status
+  final String chapterType;
+  final double price;
+  final bool isLocked;
 
   Chapter({
     required this.chapterId,
@@ -21,38 +21,33 @@ class Chapter {
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
     return Chapter(
-      chapterId: json['chapter_id']?.toString() ?? '',
-      chapterName: json['chapter_name']?.toString() ?? '',
+      chapterId: json['chapterId']?.toString() ?? '',
+      chapterName: json['chapterName']?.toString() ?? '',
       createdDate:
-          json['created_date'] != null
-              ? (json['created_date'] is DateTime
-                  ? json['created_date']
-                  : DateTime.parse(json['created_date'].toString()))
-              : DateTime.now(),
+          DateTime.tryParse(json['publishedDate']?.toString() ?? '') ??
+          DateTime.now(),
       view: int.tryParse(json['view']?.toString() ?? '0') ?? 0,
       chapterContent:
-          json['chapter_content'] is List
-              ? (json['chapter_content'] as List)
-                  .map((content) => ChapterContent.fromJson(content))
-                  .toList()
-              : [],
-      chapterType: json['chapter_type']?.toString() ?? 'free',
+          (json['chapterImages'] as List<dynamic>? ?? [])
+              .map((img) => ChapterContent.fromJson(img))
+              .toList(),
+      chapterType: json['type']?.toString() == '1' ? 'pay' : 'free',
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
-      isLocked: json['is_locked'] ?? false,
+      isLocked: json['type']?.toString() == '1', // Nếu type là 'pay', thì khóa
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'chapter_id': chapterId,
-      'chapter_name': chapterName,
-      'created_date': createdDate.toIso8601String(),
+      'chapterId': chapterId,
+      'chapterName': chapterName,
+      'createdDate': createdDate.toIso8601String(),
       'view': view,
-      'chapter_content':
+      'chapterContent':
           chapterContent.map((content) => content.toJson()).toList(),
-      'chapter_type': chapterType,
+      'chapterType': chapterType,
       'price': price,
-      'is_locked': isLocked,
+      'isLocked': isLocked,
     };
   }
 }
@@ -65,12 +60,11 @@ class ChapterContent {
 
   factory ChapterContent.fromJson(Map<String, dynamic> json) {
     return ChapterContent(
-      contentId: json['content_id']?.toString() ?? '',
-      contentUrl: json['content_url'] ?? '',
+      contentId: json['imageId']?.toString() ?? '',
+      contentUrl: json['imageURL'] ?? '',
     );
   }
-
   Map<String, dynamic> toJson() {
-    return {'content_id': contentId, 'content_url': contentUrl};
+    return {'contentId': contentId, 'contentUrl': contentUrl};
   }
 }

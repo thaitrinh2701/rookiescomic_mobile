@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:rookiescomic_mobile/models/comics.dart' as comics_model;
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:rookiescomic_mobile/screens/search_screen.dart';
@@ -19,15 +18,17 @@ class _ComicsScreenState extends State<ComicScreen> {
   Future<List<Map<String, dynamic>>> fetchTopComicOfWeek({
     required int limit,
   }) async {
+    final comics = await fetchTopWeekComics(limit: limit);
     // Call the imported function
-    return comics_model.getTopComicOfWeek(limit: limit);
+    return comics.map((comic) => comic.toStringMap()).toList();
   }
 
   Future<List<Map<String, dynamic>>> fetchTopComicOfMonth({
     required int limit,
   }) async {
+    final comics = await fetchTopMonthComics(limit: limit);
     // Call the imported function
-    return comics_model.getTopComicOfMonth(limit: limit);
+    return comics.map((comic) => comic.toStringMap()).toList();
   }
 
   void _navigateToDetail(dynamic comic) {
@@ -75,14 +76,7 @@ class _ComicsScreenState extends State<ComicScreen> {
             SizedBox(
               height: 275,
               child: ComicList(
-                fetchComic: () async {
-                  final comics = await fetchTopWeekComics(limit: 4);
-                  return comics
-                      .take(4)
-                      .map((comic) => comic.toStringMap())
-                      .toList();
-                },
-
+                fetchComic: () => fetchTopComicOfWeek(limit: 4),
                 title: " Truyện hot tuần 🔥",
                 onTapComic: _navigateToDetail,
               ),
@@ -93,14 +87,7 @@ class _ComicsScreenState extends State<ComicScreen> {
             SizedBox(
               height: 275,
               child: ComicList(
-                fetchComic: () async {
-                  final comics = await fetchTopMonthComics(limit: 4);
-                  return comics
-                      .take(4)
-                      .map((comic) => comic.toStringMap())
-                      .toList();
-                },
-
+                fetchComic: () => fetchTopComicOfMonth(limit: 4),
                 title: " Truyện hot tháng 🔥",
                 onTapComic: _navigateToDetail,
               ),

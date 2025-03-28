@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/comics.dart';
+import 'package:rookiescomic_mobile/models/chapter.dart';
 
 const String baseUrl =
     'http://10.0.2.2:8080'; // ✅ Dùng IP mặc định của emulator
@@ -49,5 +50,26 @@ Future<List<Comic>> fetchTopMonthComics({required int limit}) async {
       '❌ Failed to fetch top month comics: ${response.statusCode} - ${response.body}',
     );
     throw Exception('Failed to load top month comics');
+  }
+}
+
+Future<List<Chapter>> fetchChapters(String comicId) async {
+  final String apiUrl = '$baseUrl/chapters?comicId=$comicId';
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      return jsonData.map((json) => Chapter.fromJson(json)).toList();
+    } else {
+      print(
+        '❌ Failed to fetch chapters: ${response.statusCode} - ${response.body}',
+      );
+      throw Exception('Failed to load chapters');
+    }
+  } catch (e) {
+    print('❌ Error in fetchChapters: $e');
+    throw Exception('Error fetching chapters');
   }
 }

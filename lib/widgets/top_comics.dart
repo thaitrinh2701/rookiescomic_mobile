@@ -7,11 +7,13 @@ import 'package:rookiescomic_mobile/apis/comics_api.dart';
 class TopComicList extends StatelessWidget {
   const TopComicList({super.key});
 
-  Future<List<Map<String, dynamic>>> fetchFeatureComic({
-    required String rankingType,
+  Future<List<Map<String, String>>> fetchTopMonthComicMaps({
     required int limit,
   }) async {
-    return comics_model.getFeatureComic(rankingType: rankingType, limit: limit);
+    final comics = await fetchTopMonthComics(limit: limit);
+    return comics
+        .map((comic) => comic.toJson().map((k, v) => MapEntry(k, v.toString())))
+        .toList();
   }
 
   @override

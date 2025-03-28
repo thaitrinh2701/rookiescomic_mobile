@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
+import 'package:rookiescomic_mobile/models/comics.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

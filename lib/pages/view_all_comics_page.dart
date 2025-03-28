@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rookiescomic_mobile/models/comics.dart'; // Add this import
 import 'comic_detail_page.dart';
 
-
-class AllComicsListPage extends StatelessWidget {
+class AllComicsListPage extends StatefulWidget {
   final String title;
   final List<Map<String, dynamic>> comics; // Changed from Map<String, String>
 
@@ -16,29 +14,17 @@ class AllComicsListPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(8.0),
-        itemCount: comics.length,
-        itemExtent: 180, // Giữ cố định chiều cao để tăng hiệu suất
-        itemBuilder: (context, index) {
-          return ComicItem(comic: comics[index]);
-        },
-      ),
-    );
-  }
+  State<AllComicsListPage> createState() => _AllComicsListPageState();
 }
 
-class ComicItem extends StatelessWidget {
-  final Map<String, String> comic;
-
-  const ComicItem({super.key, required this.comic});
+class _AllComicsListPageState extends State<AllComicsListPage> {
+  String _searchQuery = '';
+  String _selectedSortOption = 'newest';
+  final Color primaryColor = const Color(0xFF4D4FC1);
+  final Color accentColor = const Color(0xFF8082FF);
 
   @override
   Widget build(BuildContext context) {
-
     // Filter and sort comics based on search query and sort option
     final filteredComics =
         widget.comics
@@ -356,16 +342,14 @@ class ComicItem extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(8),
+        height: 160,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withAlpha(51),
-              blurRadius: 5,
-              spreadRadius: 2,
+              color: Colors.grey.withOpacity(0.15),
+              blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
@@ -373,7 +357,6 @@ class ComicItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // Comic cover with gradient overlay
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(
@@ -477,18 +460,22 @@ class ComicItem extends StatelessWidget {
               ),
             ),
             // Comic info
-
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    comic["comic_name"] ?? "Không có tên",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-
                     const SizedBox(height: 4),
                     // Description
                     Expanded(

@@ -5,6 +5,7 @@ import 'package:rookiescomic_mobile/models/comics.dart'; // This import should i
 import 'package:rookiescomic_mobile/models/chapter.dart';
 import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
 import 'package:rookiescomic_mobile/screens/cart_screen.dart'; // Add this import
+import 'package:rookiescomic_mobile/apis/comics_api.dart';
 
 class ComicDetailPage extends StatefulWidget {
   final Comic comic; // Change to Comic type
@@ -23,14 +24,32 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
   int totalPages = 1;
   final TextEditingController pageController = TextEditingController();
   bool isAscendingOrder = true; // New state variable for sorting order
+  int quantityChap = 0;
 
   @override
   void initState() {
     super.initState();
-    final int quantityChap =
-        int.tryParse(widget.comic.quantityChap.toString() ?? '0') ?? 0;
-    totalPages = (quantityChap / chaptersPerPage).ceil();
+    quantityChap = int.tryParse(widget.comic.quantityChap.toString()) ?? 0;
     pageController.text = currentPage.toString();
+
+    if (widget.comic.comicId.isEmpty) {
+      print("❌ comicId is empty, skipping fetchChapters");
+      return;
+    }
+
+    print('📌 Comic ID before fetching chapters: ${widget.comic.comicId}');
+
+    // Fetch chapters from API
+    fetchChapters(widget.comic.comicId)
+        .then((fetchedChapters) {
+          setState(() {
+            widget.comic.chapters = fetchedChapters;
+            totalPages = (fetchedChapters.length / chaptersPerPage).ceil();
+          });
+        })
+        .catchError((error) {
+          print('❌ Error fetching chapters: $error');
+        });
   }
 
   void goToPage(int page) {
@@ -50,9 +69,6 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int quantityChap =
-        int.tryParse(widget.comic.quantityChap.toString() ?? '0') ?? 0;
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -140,7 +156,7 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Người đăng: ${widget.comic['poster_name'] ?? 'Không rõ'}",
+                                      "Người đăng: ${widget.comic.posterName}",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
@@ -348,189 +364,194 @@ class _ComicDetailPageState extends State<ComicDetailPage> {
             ),
           ),
           // Modified SliverList for better lock visualization
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              // Determine chapter number based on sorting order
-              int chapNumber;
-              if (isAscendingOrder) {
-                // Ascending: Start from the beginning of the current page
-                chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
-              } else {
-                // Descending: Start from the end and go backwards
-                chapNumber =
-                    quantityChap -
-                    ((currentPage - 1) * chaptersPerPage + index);
-              }
+          if (widget.comic.chapters != null &&
+              widget.comic.chapters!.isNotEmpty)
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                // Determine chapter number based on sorting order
+                int chapNumber;
+                if (isAscendingOrder) {
+                  // Ascending: Start from the beginning of the current page
+                  chapNumber = (currentPage - 1) * chaptersPerPage + index + 1;
+                } else {
+                  // Descending: Start from the end and go backwards
+                  chapNumber =
+                      quantityChap -
+                      ((currentPage - 1) * chaptersPerPage + index);
+                }
 
-              // Check if chapNumber is valid
-              if (chapNumber <= 0 || chapNumber > quantityChap) return null;
+                // Check if chapNumber is valid
+                if (chapNumber <= 0 || chapNumber > quantityChap) return null;
 
-              // Get chapter data if available
-              Chapter? chapter;
-              bool isLocked = false;
-              bool isPaid = false;
-              double price = 0.0;
+                // Get chapter data if available
+                Chapter? chapter;
+                bool isLocked = false;
+                bool isPaid = false;
+                double price = 0.0;
 
-              if (widget.comic.chapters != null &&
-                  chapNumber <= widget.comic.chapters!.length) {
-                chapter = widget.comic.chapters![chapNumber - 1];
-                isLocked = chapter.isLocked;
-                isPaid = chapter.chapterType == 'pay';
-                price = chapter.price;
-              }
+                if (widget.comic.chapters != null &&
+                    chapNumber <= widget.comic.chapters!.length) {
+                  chapter = widget.comic.chapters![chapNumber - 1];
+                  isLocked = chapter.isLocked;
+                  isPaid = chapter.chapterType == 'pay';
+                  price = chapter.price;
+                }
 
-              return Container(
-                margin: const EdgeInsets.symmetric(
-                  vertical: 4.0,
-                  horizontal: 16.0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  border:
-                      isPaid && isLocked
-                          ? Border.all(
-                            color: Colors.orange,
-                            width: 2.0,
-                          ) // Make border more visible
-                          : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 4.0,
                     horizontal: 16.0,
-                    vertical: 12.0,
                   ),
-                  leading: CircleAvatar(
-                    backgroundColor:
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    border:
                         isPaid && isLocked
-                            ? Colors.orange
-                            : const Color(0xFF4D4FC1),
-                    child:
-                        isPaid && isLocked
-                            ? const Icon(
-                              Icons.lock,
-                              color: Colors.white,
-                              size: 20,
-                            )
-                            : Text(
-                              "$chapNumber",
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        "Chương $chapNumber",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color:
-                              isPaid && isLocked
-                                  ? Colors.orange.shade800
-                                  : Colors.black,
-                        ),
+                            ? Border.all(
+                              color: Colors.orange,
+                              width: 2.0,
+                            ) // Make border more visible
+                            : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
                       ),
-                      if (isPaid && isLocked)
-                        Container(
-                          margin: const EdgeInsets.only(left: 8.0),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.lock, size: 12, color: Colors.white),
-                              SizedBox(width: 4),
-                              Text(
-                                "KHÓA",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                     ],
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      if (isPaid && isLocked)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.monetization_on,
-                                size: 16,
-                                color: Colors.orange,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          isPaid && isLocked
+                              ? Colors.orange
+                              : const Color(0xFF4D4FC1),
+                      child:
+                          isPaid && isLocked
+                              ? const Icon(
+                                Icons.lock,
+                                color: Colors.white,
+                                size: 20,
+                              )
+                              : Text(
+                                "$chapNumber",
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${price.toInt()} xu",
-                                style: const TextStyle(
-                                  fontSize: 14,
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          "Chương $chapNumber",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color:
+                                isPaid && isLocked
+                                    ? Colors.orange.shade800
+                                    : Colors.black,
+                          ),
+                        ),
+                        if (isPaid && isLocked)
+                          Container(
+                            margin: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.lock, size: 12, color: Colors.white),
+                                SizedBox(width: 4),
+                                Text(
+                                  "KHÓA",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Cập nhật ${DateTime.now().subtract(Duration(days: chapNumber)).day}/${DateTime.now().subtract(Duration(days: chapNumber)).month}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        if (isPaid && isLocked)
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.monetization_on,
+                                  size: 16,
                                   color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                  trailing:
-                      isPaid && isLocked
-                          ? ElevatedButton.icon(
-                            icon: const Icon(Icons.shopping_cart, size: 16),
-                            label: const Text("Mua"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${price.toInt()} xu",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => CartScreen(
-                                        args: {
-                                          'comic': widget.comic,
-                                          'chapter': chapter,
-                                        },
-                                      ),
-                                ),
-                              );
-                            },
-                          )
-                          : const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Convert to zero-based index for the chapter array
-                    int chapterIndex = chapNumber - 1;
-                    _navigateToReadingScreen(chapterIndex);
-                  },
-                ),
-              );
-            }, childCount: chaptersPerPage),
-          ),
+                          ),
+                      ],
+                    ),
+                    trailing:
+                        isPaid && isLocked
+                            ? ElevatedButton.icon(
+                              icon: const Icon(Icons.shopping_cart, size: 16),
+                              label: const Text("Mua"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => CartScreen(
+                                          args: {
+                                            'comic': widget.comic,
+                                            'chapter': chapter,
+                                          },
+                                        ),
+                                  ),
+                                );
+                              },
+                            )
+                            : const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Convert to zero-based index for the chapter array
+                      int chapterIndex = chapNumber - 1;
+                      _navigateToReadingScreen(chapterIndex);
+                    },
+                  ),
+                );
+              }, childCount: chaptersPerPage),
+            ),
 
           SliverToBoxAdapter(
             child: Padding(
