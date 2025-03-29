@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SubscriptionService {
-  static const String baseUrl = "http://10.0.2.2:8080"; 
+  static const String baseUrl = "http://10.0.2.2:8080";
 
   static Future<String?> updateUserRole(String userId, int newRole) async {
     final url = Uri.parse("$baseUrl/users/update-role");
@@ -26,7 +26,6 @@ class SubscriptionService {
     print("❌ Lỗi khi cập nhật vai trò");
     return null;
   }
-
 
   static Future<bool> createTransaction(double amount, String walletId) async {
     final url = Uri.parse("$baseUrl/transaction");
@@ -70,7 +69,6 @@ class SubscriptionService {
       return "❌ Thanh toán không thành công. Vui lòng thử lại!";
     }
 
-    return "✅ Gói ${newRole} đã được kích hoạt thành công!";
+    return "✅ Gói $newRole đã được kích hoạt thành công!";
   }
-
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/cart_item.dart';
 import 'package:rookiescomic_mobile/models/chapter.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
-import 'package:rookiescomic_mobile/screens/reading_comic_screen.dart';
+import 'package:rookiescomic_mobile/apis/add_cart.dart';
 
 class CartScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
@@ -81,13 +81,20 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void _checkout() {
-    // Add purchased chapter IDs to the tracking set
-    for (var item in _cartItems) {
-      _purchasedChapterIds.add(item.chapterId);
+  void _checkout() async {
+    var result = await AddCartApi.updateOrderStatus();
+
+    if (result != null && result['success'] == true) {
+      print("✅ Thanh toán thành công! Mã đơn: ${result['orderId']}");
+      if (result.containsKey('walletId')) {
+        print("💰 Thanh toán từ ví: ${result['walletId']}");
+      }
+    } else {
+      print("❌ Thanh toán thất bại!");
+      return; // Dừng nếu thanh toán thất bại
     }
 
-    // Determine which screen to return to and with what data
+    // Simulate purchase and return to previous screen with updated unlock status
     showDialog(
       context: context,
       builder:
@@ -99,56 +106,19 @@ class _CartScreenState extends State<CartScreen> {
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
 
-                  // Extract chapter information for navigation
-                  Map<String, dynamic>? args = widget.args;
-                  if (args != null &&
-                      args.containsKey('comic') &&
-                      args.containsKey('chapter')) {
-                    Comic comic = args['comic'];
-                    Chapter purchasedChapter = args['chapter'];
-
-                    // Find the index of the purchased chapter
-                    int chapterIndex = -1;
-                    if (comic.chapters != null) {
-                      for (int i = 0; i < comic.chapters!.length; i++) {
-                        if (comic.chapters![i].chapterId ==
-                            purchasedChapter.chapterId) {
-                          chapterIndex = i;
-                          break;
-                        }
-                      }
-                    }
-
-                    // Clear cart
-                    setState(() {
-                      _cartItems.clear();
-                      _calculateTotal();
-                    });
-
-                    Navigator.pop(context); // Return to comic detail page
-
-                    // Navigate to reading screen with the purchased chapter
-                    if (chapterIndex >= 0) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => ReadingComicScreen(
-                                comic: comic,
-                                initialChapterIndex: chapterIndex,
-                                initialPageIndex: 0,
-                              ),
-                        ),
-                      );
-                    }
-                  } else {
-                    // Just return to comic detail page
-                    setState(() {
-                      _cartItems.clear();
-                      _calculateTotal();
-                    });
-                    Navigator.pop(context);
+                  // Only pop back to reading screen if we came from there
+                  if (widget.args != null) {
+                    Navigator.pop(
+                      context,
+                      true,
+                    ); // Return to reading screen with success flag
                   }
+
+                  // Clear cart after successful purchase
+                  setState(() {
+                    _cartItems.clear();
+                    _calculateTotal();
+                  });
                 },
                 child: const Text('OK'),
               ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/components/loader.dart';
-import 'package:rookiescomic_mobile/models/comics.dart' as comics_model;
 import 'package:rookiescomic_mobile/widgets/top_comics_slider.dart';
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
 

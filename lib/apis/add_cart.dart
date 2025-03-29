@@ -12,25 +12,32 @@ class AddCartApi {
       String? userId = prefs.getString("user_id");
       if (userId == null) return false;
 
-      final orderResponse = await http.post(
+      var requestBody = {
+        "userId": userId,
+        "status": 0,
+        "orderDetails": [
+          {
+            "chapterId": item.chapterId,
+            "price": 999,
+            "status": 1,
+          }
+        ]
+      };
+
+      print("JSON gửi lên: ${jsonEncode(requestBody)}");
+
+      final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "userId": userId,
-          "status": 0, // UNORDERED
-          "orderDetails": [
-            {
-              "chapterId": item.chapterId,
-              "price": 999, // Mặc định
-              "status": 1, // ACTIVE
-            }
-          ]
-        }),
+        body: jsonEncode(requestBody),
       );
 
-      return orderResponse.statusCode == 200 || orderResponse.statusCode == 201;
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      print("Error adding to cart: $e");
+      print("🔥 Error adding to cart: $e");
       return false;
     }
   }
@@ -58,6 +65,39 @@ class AddCartApi {
       }
     } catch (e) {
       print("Error fetching order: $e");
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> updateOrderStatus() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString("user_id");
+      if (userId == null) return null;
+
+      var requestBody = {
+        "userId": userId,
+        "newStatusByte": 2 // 2 là trạng thái COMPLETED
+      };
+
+      print("JSON gửi lên: ${jsonEncode(requestBody)}");
+
+      final response = await http.post(
+        Uri.parse("$apiUrl/update-status"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("Lỗi khi cập nhật trạng thái đơn hàng: $e");
       return null;
     }
   }

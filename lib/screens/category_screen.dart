@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rookiescomic_mobile/models/comics.dart';
-import 'package:rookiescomic_mobile/pages/comic_detail_page.dart'; // Add this import
+import 'package:rookiescomic_mobile/pages/comic_detail_page.dart';
 import 'package:rookiescomic_mobile/apis/comics_api.dart';
+import 'package:rookiescomic_mobile/utils/image_sort_utils.dart'; // nếu bạn dùng formatDate
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -12,14 +13,12 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
   final Color primaryColor = const Color(0xFF4D4FC1);
-  final Color accentColor = const Color(0xFF8082FF);
   final Color backgroundColor = const Color(0xFFF8F9FA);
 
-  String selectedGenre = "all"; // Default shows all genres
+  String selectedGenre = "all";
   bool isLoading = true;
   List<Map<String, String>> comicsData = [];
 
-  // Define genres with their display names and colors
   final List<Map<String, dynamic>> genres = [
     {"id": "all", "name": "Tất cả", "color": Color(0xFF4D4FC1)},
     {"id": "action", "name": "Hành động", "color": Color(0xFFE53935)},
@@ -38,43 +37,25 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   Future<void> _loadComics() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      final allComics = await fetchAllComics();
+      List<Comic> comics;
 
-      // Convert dynamic values to strings for display
-      final formattedComics =
-          allComics.map((comic) {
-            return comic.toJson().map(
-              (key, value) => MapEntry(key, value.toString()),
-            );
-          }).toList();
+      if (selectedGenre == "all") {
+        comics = await fetchAllComics();
+      } else {
+        comics = await fetchComicsByGenresName(selectedGenre);
+      }
 
       setState(() {
-        comicsData = formattedComics;
+        comicsData = comics.map((comic) => comic.toStringMap()).toList();
         isLoading = false;
       });
     } catch (e) {
-      print("Error loading comics: $e");
-      setState(() {
-        isLoading = false;
-      });
+      print("❌ Error loading comics: $e");
+      setState(() => isLoading = false);
     }
-  }
-
-  List<Map<String, String>> getFilteredComics() {
-    if (selectedGenre == "all") {
-      return comicsData;
-    }
-    return comicsData
-        .where(
-          (comic) =>
-              comic["genres_id"]?.toLowerCase() == selectedGenre.toLowerCase(),
-        )
-        .toList();
   }
 
   String getGenreName(String genreId) {
@@ -95,16 +76,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredComics = getFilteredComics();
-
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Text(
-          'Thể loại truyện tranh',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Thể loại truyện tranh'),
         elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
@@ -117,9 +93,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
             child:
                 isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : filteredComics.isEmpty
+                    : comicsData.isEmpty
                     ? _buildEmptyState()
-                    : _buildComicGrid(filteredComics),
+                    : _buildComicGrid(comicsData),
           ),
         ],
       ),
@@ -144,15 +120,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     genre["name"],
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   backgroundColor: Colors.white,
                   selectedColor: genre["color"],
                   checkmarkColor: Colors.white,
-                  elevation: 2,
-                  pressElevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                     side: BorderSide(
@@ -166,6 +138,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     setState(() {
                       selectedGenre = genre["id"];
                     });
+                    _loadComics();
                   },
                 ),
               );
@@ -195,6 +168,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               setState(() {
                 selectedGenre = "all";
               });
+              _loadComics();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Xem tất cả thể loại'),
@@ -222,189 +196,122 @@ class _CategoryScreenState extends State<CategoryScreen> {
         final comic = comics[index];
         final genreId = comic["genres_id"] ?? "unknown";
 
-        return _buildComicCard(comic, genreId);
-      },
-    );
-  }
+        return GestureDetector(
+          onTap: () {
+            final processedComic = {
+              "comic_id": comic["comic_id"],
+              "comic_name": comic["comic_name"],
+              "cover_url": comic["cover_url"],
+              "user_id": comic["user_id"],
+              "created_date": comic["created_date"],
+              "quantity_chap": comic["quantity_chap"],
+              "description": comic["description"],
+              "status": comic["status"],
+              "view": comic["view"],
+              "genres_id": comic["genres_id"],
+            };
 
-  Widget _buildComicCard(Map<String, String> comic, String genreId) {
-    return GestureDetector(
-      onTap: () {
-        // Convert string values to appropriate types for ComicDetailPage
-        // This ensures the data format is compatible
-        final processedComic = {
-          "comic_id": comic["comic_id"],
-          "comic_name": comic["comic_name"],
-          "cover_url": comic["cover_url"],
-          "user_id": comic["user_id"],
-          "created_date": comic["created_date"],
-          "quantity_chap": comic["quantity_chap"],
-          "description": comic["description"],
-          "status": comic["status"],
-          "view": comic["view"],
-          "genres_id": comic["genres_id"],
-        };
-
-        // Navigate to comic detail page with the selected comic
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => ComicDetailPage(
-                  comic: Comic.fromJson(
-                    processedComic.map(
-                      (key, value) => MapEntry(key, value ?? ''),
-                    ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        ComicDetailPage(comic: Comic.fromJson(processedComic)),
+              ),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      Image.network(
+                        comic["cover_url"] ?? "",
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (ctx, error, stackTrace) => Container(
+                              height: 180,
+                              color: Colors.grey.shade300,
+                              child: const Center(
+                                child: Icon(Icons.image_not_supported),
+                              ),
+                            ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: getGenreColor(genreId),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            getGenreName(genreId),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        comic["comic_name"] ?? "Unknown Title",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        formatDate(comic["created_date"]),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Comic Cover Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-              child: Stack(
-                children: [
-                  Image.network(
-                    comic["cover_url"] ?? "",
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (ctx, error, stackTrace) => Container(
-                          height: 180,
-                          color: Colors.grey.shade300,
-                          child: Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: getGenreColor(genreId),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        getGenreName(genreId),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.7),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.remove_red_eye,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            comic["view"] ?? "0",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                          const Spacer(),
-                          const Icon(
-                            Icons.bookmark,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${comic["quantity_chap"] ?? "0"} chap",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Comic Info
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    comic["comic_name"] ?? "Unknown Title",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatDate(comic["created_date"]),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
