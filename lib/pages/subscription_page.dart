@@ -5,7 +5,7 @@ import 'package:rookiescomic_mobile/widgets/coin_packages.dart';
 import 'package:rookiescomic_mobile/widgets/subscription_plans.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({super.key});
+  const SubscriptionScreen({Key? key}) : super(key: key);
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
@@ -19,9 +19,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
   String promotionBalance = "0 xu";
 
   final List<Map<String, dynamic>> coinPackages = [
-    {"id": 1, "coins": 100, "bonus": 10, "price": "20000", "popular": false},
-    {"id": 2, "coins": 300, "bonus": 50, "price": "50000", "popular": true},
-    {"id": 3, "coins": 500, "bonus": 100, "price": "80000", "popular": false},
+    {"id": 1, "coins": 20000, "bonus": 100, "price": "20000", "popular": false},
+    {"id": 2, "coins": 50000, "bonus": 500, "price": "50000", "popular": true},
+    {"id": 3, "coins": 80000, "bonus": 900, "price": "80000", "popular": false},
   ];
 
   // Colors for the new design - updated to match login color scheme
@@ -54,12 +54,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
         title: const Text('Nạp Xu'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: 'Gói Xu'), Tab(text: 'Gói Người Dùng')],
+          tabs: const [
+            Tab(text: 'Gói Xu'),
+            Tab(text: 'Gói Người Dùng'),
+          ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildCoinPurchaseTab(), SubscriptionPlans()],
+        children: [
+          _buildCoinPurchaseTab(),
+          SubscriptionPlans(),
+        ],
       ),
     );
   }
@@ -73,10 +79,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Số dư: $balance", style: const TextStyle(fontSize: 16)),
-              Text(
-                "Xu khuyến mãi: $promotionBalance",
-                style: const TextStyle(fontSize: 16, color: Colors.green),
-              ),
+              Text("Xu khuyến mãi: $promotionBalance", style: const TextStyle(fontSize: 16, color: Colors.green)),
             ],
           ),
         ),
